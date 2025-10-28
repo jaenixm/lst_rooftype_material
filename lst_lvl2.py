@@ -6,7 +6,7 @@ Input:  a folder containing the scene's *_ST_B10.TIF and *_QA_PIXEL.TIF
 Output: LST GeoTIFF (Celsius by default), cloud/snow/cirrus/shadow masked.
 
 Usage:
-  python make_landsat_lst.py /path/to/scene_folder --out lst.tif --unit celsius
+  python lst_lvl2.py LC08_L2SP_196023_20240813_20240822_02_T1 --out lst.tif --unit celsius
 """
 
 import argparse
@@ -116,11 +116,6 @@ def main():
         dtype="float32",
         count=1,
         nodata=np.nan,
-        compress="LZW",
-        predictor=3,  # better for floats
-        tiled=True,
-        blockxsize=256,
-        blockysize=256
     )
 
     # Default output name
