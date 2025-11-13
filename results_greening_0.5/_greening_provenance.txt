@@ -1,0 +1,4 @@
+Roof types converted: concrete, tar_paper
+Target NDVI: 0.5 (computed within LST-valid area if not provided)
+Target Albedo: 0.2
+Supersample: 4
