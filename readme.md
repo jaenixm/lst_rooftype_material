@@ -2,7 +2,58 @@
 
 # Green Roof Scenario — Empirical Urban Heat Mitigation Modeling
 
-This project contains the script `green_roof_scenario.py`, which simulates how much **land surface temperature (LST)** would decrease if selected building roofs were converted to **green roofs**, using **remote sensing** and a **data-driven regression model**.
+This repository now ships a reusable Python package (`green_roof_scenario`) plus a thin compatibility script `green_roof_scenario.py`. The package simulates how much **land surface temperature (LST)** would decrease if selected building roofs were converted to **green roofs**, using **remote sensing** and a **data-driven regression model**.
+
+## 📦 Installation & CLI Usage
+
+```bash
+python -m pip install -e .            # install locally (PEP 517/518 via pyproject)
+green-roof-scenario --help            # show CLI options
+green-roof-scenario \
+  --l2_folder data/LC09_L2SP_196023_20250621_20250622_02_T1 \
+  --buildings results/buildings_with_lst.gpkg \
+  --roof_field predictedroofmaterials \
+  --roof_types "concrete, tar_paper" \
+  --out_dir results_greening_demo \
+  --build_lst --target_ndvi 0.4 --model rf \
+  --min_roof_area 100     
+
+```
+
+When `--build_lst` is set and no `--lst` path is provided, the baseline raster is
+written to `<out_dir>/baseline_LST.tif` alongside the other outputs.
+
+Programmatic use is also supported:
+
+```python
+from green_roof_scenario import ScenarioConfig, run_scenario
+
+config = ScenarioConfig(
+    l2_folder="data/LC09_L2SP_196023_20250621_20250622_02_T1",
+    buildings="results/buildings_with_lst.gpkg",
+    roof_field="predictedroofmaterials",
+    roof_types="concrete, tar_paper",
+    out_dir="results_greening_demo",
+    build_lst=True,
+    target_ndvi=0.4,
+    model="rf",
+)
+run_scenario(config)
+```
+
+### Source layout
+
+The package follows a modern `src/` layout:
+
+| Module | Responsibility |
+|--------|----------------|
+| `green_roof_scenario.cli` | Argparse-based CLI entry point |
+| `green_roof_scenario.config` | Dataclasses for scenario configuration |
+| `green_roof_scenario.l2` | Landsat L2 helpers (LST build, NDVI/albedo) |
+| `green_roof_scenario.modeling` | Sampling, regression fitting, prediction |
+| `green_roof_scenario.masking` | Building filtering and roof fraction rasters |
+| `green_roof_scenario.scenario` | High-level orchestration + outputs |
+| `green_roof_scenario.io` | Raster IO helpers |
 
 ## 🎯 Goal
 

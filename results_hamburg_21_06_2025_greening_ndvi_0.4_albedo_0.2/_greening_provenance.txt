@@ -1,8 +1,0 @@
-Roof types converted: concrete, tar_paper
-Target NDVI: 0.4 (computed within LST-valid area if not provided)
-Target Albedo: 0.2
-LST source: built from L2 folder
-Supersample: 4
-Model type: rf
-Used NDBI predictor: yes
-LST build options: unit=celsius, keep_water=False

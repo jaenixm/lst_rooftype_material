@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "green-roof-scenario"
+version = "0.1.0"
+description = "Empirical Landsat-based green roof scenario modeling."
+readme = "readme.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Green Roof Scenario Maintainers" },
+]
+dependencies = [
+    "numpy>=1.23",
+    "rasterio>=1.3",
+    "geopandas>=0.13",
+    "rasterstats>=0.19",
+    "scikit-learn>=1.2",
+    "shapely>=2.0",
+]
+
+[project.scripts]
+green-roof-scenario = "green_roof_scenario.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

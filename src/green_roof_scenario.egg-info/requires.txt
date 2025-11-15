@@ -1,0 +1,6 @@
+numpy>=1.23
+rasterio>=1.3
+geopandas>=0.13
+rasterstats>=0.19
+scikit-learn>=1.2
+shapely>=2.0

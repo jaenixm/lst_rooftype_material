@@ -1,8 +1,0 @@
-Raster: lst_bremen.tif
-Raster CRS: EPSG:32632
-Raster nodata: nan
-Buildings: building_footprint.gpkg
-Layer: None
-Roof field: predictedroofmaterials
-All touched: True
-City mean LST: 38.945
