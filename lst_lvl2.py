@@ -6,7 +6,7 @@ Input:  a folder containing the scene's *_ST_B10.TIF and *_QA_PIXEL.TIF
 Output: LST GeoTIFF (Celsius by default), cloud/snow/cirrus/shadow masked.
 
 Usage:
-  python lst_lvl2.py LC08_L2SP_196023_20240813_20240822_02_T1 --out lst.tif --unit celsius
+  python lst_lvl2.py data/LC08_L2SP_195023_20250622_20250630_02_T1 --out lst_hamburg.tif --unit celsius
 """
 
 import argparse

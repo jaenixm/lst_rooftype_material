@@ -101,7 +101,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_thumb_small.jpeg"
                 }
-            }
+            },
+            "file:checksum": "1340d4eaa35c14add87183af27cf0cd2e6af6f599f095ca2ffa7987bf491e36cb7bf5c12399ed06578e8f41508f5e6cf54e78de46c03fe839fd83b9e1c1306908390"
         },
         "reduced_resolution_browse": {
             "title": "Reduced resolution browse image",
@@ -116,7 +117,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_thumb_large.jpeg"
                 }
-            }
+            },
+            "file:checksum": "134046d8e4a94d428f06cfaa6664e36767c4771269ebd46795ba81c49c500edd88695c2469996b576bb808ca319046197f1da928a93afbafee3112b69d5f42feb791"
         },
         "index": {
             "title": "HTML index page",
@@ -140,7 +142,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_MTL.json"
                 }
-            }
+            },
+            "file:checksum": "13401af0383feab4a2a467e0b54a77faacff055f50f821d11aac809a7a457c4bdc710fdee75391bb543f5dd08a65ce70e5d75026f5eae25ea4e141535760294f75a8"
         },
         "coastal": {
             "title": "Coastal/Aerosol Band (B1)",
@@ -164,7 +167,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_B1.TIF"
                 }
-            }
+            },
+            "file:checksum": "1340102a02e6e7eb3bd4e77569511b5cf4adf839793119ed1ded006df94b42b3dc735a8b044465ed51b01a5bbceea0897b24a6498a7ff6293bcdf4a08d1f53be44a2"
         },
         "blue": {
             "title": "Blue Band (B2)",
@@ -188,7 +192,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_B2.TIF"
                 }
-            }
+            },
+            "file:checksum": "1340d9f15ba3680c1d9ee6059d07c1e6f72a7fdde8ee5020618ab5043acec3f2ae70c879bb5c66a9262d745cd55e9fb76078fe028103712bf5907425e6e18a1daae8"
         },
         "green": {
             "title": "Green Band (B3)",
@@ -212,7 +217,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_B3.TIF"
                 }
-            }
+            },
+            "file:checksum": "1340b72f531fb129362c0a974344f362f3de5b71e75823a26c5ac6abaea6e394958b639800a53f509df9f0bb93e81a13c159a10acd2855e3f86469f06554b5a667a1"
         },
         "red": {
             "title": "Red Band (B4)",
@@ -236,7 +242,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_B4.TIF"
                 }
-            }
+            },
+            "file:checksum": "1340f05c40a82afa743753f09eae07b0c77f555dfef8df7c2260c2654397590825c9ac0ba406bb8aad1fc03a516ec9beda817cfcb8737240af2c506b8f8fb8e350e7"
         },
         "nir08": {
             "title": "Near Infrared Band 0.8 (B5)",
@@ -261,7 +268,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_B5.TIF"
                 }
-            }
+            },
+            "file:checksum": "1340212815c0da24db2197c9702d9665f2c0adf1e2f256f9325a33ff24ebe8a0152273094742b2cebc8088e5148ef4ad8f2314a471a6222d6cbaaaf777fb38573b7e"
         },
         "swir16": {
             "title": "Short-wave Infrared Band 1.6 (B6)",
@@ -286,7 +294,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_B6.TIF"
                 }
-            }
+            },
+            "file:checksum": "13401090c9010abcd2e75b845bd5a735f5d14939dfa2c24ea2c30fb990d92cae1da0b053934795ff25fa8cea6462b86705101884306152bd468736152b9f658f5bf3"
         },
         "swir22": {
             "title": "Short-wave Infrared Band 2.2 (B7)",
@@ -311,7 +320,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_B7.TIF"
                 }
-            }
+            },
+            "file:checksum": "1340af946971f4e7ac43c413cf8bdfd4219ff4db28d99b0a2eebea171473ccb1eea6f55b203da26913bfb0ee69e6c923a1bb765435004e84d2de45d530dd94655275"
         },
         "qa_aerosol": {
             "title": "Aerosol Quality Analysis Band",
@@ -457,7 +467,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_SR_QA_AEROSOL.TIF"
                 }
-            }
+            },
+            "file:checksum": "1340a021f9afe67a4851e27334a423c0b6b8a27189f37c2f1ae07c89fbff99a716cdd6d4cec86ae6526edc47dc44e2fbe26f98c59d35263dd289add31196d7827fad"
         },
         "qa_pixel": {
             "title": "Pixel Quality Assessment Band",
@@ -734,7 +745,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_QA_PIXEL.TIF"
                 }
-            }
+            },
+            "file:checksum": "13401561f0ca363122257ef46ab8a7b528c8735f166396a2d3b049be0c21ee686317ec490289d500d07e8922ecde99fdbdf933be000471c10d82ae256a73c1d775cd"
         },
         "qa_radsat": {
             "title": "Radiometric Saturation Quality Assessment Band",
@@ -1005,7 +1017,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_QA_RADSAT.TIF"
                 }
-            }
+            },
+            "file:checksum": "13409dd6800211ca7b620c54747490666a95f2995cf5c7148f2f7cc10093e7ba247f8ce0adb3f790f97c29239a690bd94f9d7dacb5a9b1fb00b1c5b1c45d54228d7a"
         },
         "ANG.txt": {
             "title": "Angle Coefficients File",
@@ -1021,7 +1034,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_ANG.txt"
                 }
-            }
+            },
+            "file:checksum": "13401e62d7c1105d2edc8fc9126a5c6c059d1bce7cc1441c6c82d035220b2fc790c98c101da959909ce3dc5da91219ee4ca9bf8915c5d2555b42c56e6e4c85c06521"
         },
         "MTL.txt": {
             "title": "Product Metadata File",
@@ -1037,7 +1051,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_MTL.txt"
                 }
-            }
+            },
+            "file:checksum": "1340a1d3761c2438b4cc4f91acb30da17cdda67e9240a532ac991114b56fead1e911e3b4549303070fa9883d1855f87d7a39cd80024ea865e59abf387ebb7ec0d755"
         },
         "MTL.xml": {
             "title": "Product Metadata File (xml)",
@@ -1053,7 +1068,8 @@
                     "storage:requester_pays": true,
                     "href": "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2024/196/023/LC08_L2SP_196023_20240813_20240822_02_T1/LC08_L2SP_196023_20240813_20240822_02_T1_MTL.xml"
                 }
-            }
+            },
+            "file:checksum": "13407166d8a9335ddfbdb67055588ccfcdc2db3722e3df5c2e593f8f8d20baa7d2765e66b92a798d4fedd90b53916b13710d8cd124c656f5fae794967eca4c0173a1"
         }
     },
     "links": [
