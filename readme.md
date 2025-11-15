@@ -4,7 +4,7 @@
 
 This repository now ships a reusable Python package (`green_roof_scenario`) plus a thin compatibility script `green_roof_scenario.py`. The package simulates how much **land surface temperature (LST)** would decrease if selected building roofs were converted to **green roofs**, using **remote sensing** and a **data-driven regression model**.
 
-## 📦 Installation & CLI Usage
+## Installation & CLI Usage
 
 ```bash
 python -m pip install -e .            # install locally (PEP 517/518 via pyproject)
@@ -59,7 +59,7 @@ The package follows a modern `src/` layout:
 | `green_roof_scenario.scenario` | High-level orchestration + outputs |
 | `green_roof_scenario.io` | Raster IO helpers |
 
-## 🎯 Goal
+## Goal
 
 Evaluate the **cooling potential** of green roof interventions **directly from satellite imagery** — fast, spatially explicit, and scientifically backed.
 
@@ -70,7 +70,7 @@ This approach does **not** rely on heavy physical climate models. Instead, it fo
 
 These studies show that **modifying NDVI and Albedo on rooftops** and re-predicting LST is a scientifically valid method for simulating urban greening scenarios.
 
-## 🔧 How It Works
+## How It Works
 
 1. **Input data**
    - Baseline LST raster (°C) from Landsat 8/9 Level-2 Surface Temperature.
@@ -104,7 +104,7 @@ These studies show that **modifying NDVI and Albedo on rooftops** and re-predict
    - `buildings_greening_impact.gpkg` → per-building mean cooling
    - Optional `roof_fraction.tif` → visualization of roof pixel influence
 
-## ✅ Output Overview
+## Output Overview
 
 | File | Description |
 |------|-------------|
@@ -114,7 +114,7 @@ These studies show that **modifying NDVI and Albedo on rooftops** and re-predict
 | `buildings_greening_impact.gpkg` | Each building with mean ΔLST |
 | `_greening_provenance.txt` | Documents roof types, NDVI target, parameters |
 
-## 📚 Why This Is Scientifically Valid
+## Why This Is Scientifically Valid
 
 This method is directly aligned with **recent remote sensing literature**, which uses **remote sensing + empirical regression models** for green roof simulations — instead of heavy simulation tools like ENVI-met.
 
@@ -124,7 +124,7 @@ It is:
 - ✅ **Quantitative and explainable**
 - ✅ **Defensible for urban planning and policy**
 
-## 🧪 Methodology Reference
+## Methodology Reference
 
 The file `Model_green_roof_effect.pdf` summarizes the scientific basis that guides this package.
 Highlights from that document:
