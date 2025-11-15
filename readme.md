@@ -15,10 +15,14 @@ green-roof-scenario \
   --roof_field predictedroofmaterials \
   --roof_types "concrete, tar_paper" \
   --out_dir results_greening_demo \
-  --build_lst --target_ndvi 0.4 --model rf \
+  --build_lst \
+  --model rf \
   --min_roof_area 100     
 
 ```
+
+Random Forest (`--model rf`) is the default choice per the methodology outlined in
+`Model_green_roof_effect.pdf`, but `--model linear` remains available for deterministic fits.
 
 When `--build_lst` is set and no `--lst` path is provided, the baseline raster is
 written to `<out_dir>/baseline_LST.tif` alongside the other outputs.
@@ -75,10 +79,10 @@ These studies show that **modifying NDVI and Albedo on rooftops** and re-predict
      or **precomputed NDVI + Albedo rasters**.
 
 2. **Fit an empirical model**
-   The script learns how **LST depends on NDVI and albedo** in your own city:
-   ```
-   LST = a + b × NDVI + c × Albedo
-   ```
+   By default the package trains a **Random Forest regressor** that maps NDVI, broadband
+   albedo, and NDBI to the observed LST. A linear model is still available via `--model linear`
+   if you need a simple parametric form, but the RF baseline is recommended for green-roof
+   assessments.
 
 3. **Select roof types to “green”**
    Example:
@@ -120,6 +124,22 @@ It is:
 - ✅ **Quantitative and explainable**
 - ✅ **Defensible for urban planning and policy**
 
-## 👤 Author / Contact
+## 🧪 Methodology Reference
 
-Your name / institution / email here.
+The file `Model_green_roof_effect.pdf` summarizes the scientific basis that guides this package.
+Highlights from that document:
+
+- **Predictor set** – we follow Verbeiren et al. 2024 and Martínez-Pérez et al. 2023 by using
+  Landsat Collection 2 SR products to derive NDVI, broadband albedo (Liang 2000/2001
+  coefficients), and NDBI as predictors.
+- **Observed target** – Landsat ST_B10 (C2 L2) provides the calibrated LST that the model
+  predicts; QA_PIXEL masks ensure clouds, shadows, and water are excluded.
+- **Spatial sampling** – to limit spatial autocorrelation the training pool is thinned to a
+  minimum spacing of ~100 m (≈3–4 pixels) before sampling the requested fraction.
+- **Model choice** – Random Forest regression is recommended because it captures the
+  non-linear responses of LST to vegetation, albedo, and built-up intensity, with typical
+  scene-level performance of R²≈0.6–0.75 / RMSE≈2°C, matching the cited literature.
+- **Scenario blending** – rooftop NDVI and albedo are blended toward realistic green roof
+  targets (NDVI≈0.4, albedo≈0.20) proportionally to the supersampled roof fraction,
+  matching the procedure detailed in the PDF.
+
