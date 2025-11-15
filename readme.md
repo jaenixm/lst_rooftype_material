@@ -114,16 +114,6 @@ These studies show that **modifying NDVI and Albedo on rooftops** and re-predict
 | `buildings_greening_impact.gpkg` | Each building with mean ΔLST |
 | `_greening_provenance.txt` | Documents roof types, NDVI target, parameters |
 
-## Why This Is Scientifically Valid
-
-This method is directly aligned with **recent remote sensing literature**, which uses **remote sensing + empirical regression models** for green roof simulations — instead of heavy simulation tools like ENVI-met.
-
-It is:
-- ✅ **Fast and scalable**
-- ✅ **Fully satellite-based**
-- ✅ **Quantitative and explainable**
-- ✅ **Defensible for urban planning and policy**
-
 ## Methodology Reference
 
 The file `Model_green_roof_effect.pdf` summarizes the scientific basis that guides this package.
