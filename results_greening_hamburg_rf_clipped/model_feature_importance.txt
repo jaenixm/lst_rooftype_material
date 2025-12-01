@@ -1,0 +1,4 @@
+Random Forest feature importances (sum=1):
+ndvi: 0.4346
+albedo: 0.1367
+ndbi: 0.4287

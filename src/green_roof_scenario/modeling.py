@@ -84,9 +84,10 @@ def fit_model(
         model = LinearRegression().fit(X_train, y_train)
     else:
         model = RandomForestRegressor(
-            n_estimators=300,
-            max_depth=20,
-            min_samples_leaf=5,
+            n_estimators=500,
+            max_depth=12,          # Limit depth to prevent complex "if-then" chains
+            min_samples_leaf=5,    # Require at least 5 pixels to make a decision
+            max_features="sqrt",   # (Optional) Forces trees to use different variables
             random_state=seed,
             n_jobs=-1,
         ).fit(X_train, y_train)
@@ -106,9 +107,14 @@ def fit_model(
 
 
 def predict_model(model, ndvi: np.ndarray, albedo: np.ndarray, ndbi: np.ndarray) -> np.ndarray:
-    Xfull = np.column_stack([ndvi.ravel(), albedo.ravel(), ndbi.ravel()])
-    yhat = model.predict(Xfull).reshape(ndvi.shape)
-    return yhat
+    mask = np.isfinite(ndvi) & np.isfinite(albedo) & np.isfinite(ndbi)
+    out = np.full(ndvi.shape, np.nan, dtype="float32")
+    if mask.sum() == 0:
+        return out
+    X = np.column_stack([ndvi.ravel()[mask.ravel()], albedo.ravel()[mask.ravel()], ndbi.ravel()[mask.ravel()]])
+    preds = model.predict(X).astype("float32")
+    out.ravel()[mask.ravel()] = preds
+    return out
 
 
 def predict_partial(
@@ -126,4 +132,3 @@ def predict_partial(
     yhat = model.predict(X).astype("float32")
     out.ravel()[idx] = yhat
     return out
-

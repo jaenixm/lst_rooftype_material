@@ -15,6 +15,7 @@ class ScenarioConfig:
     buildings: Path
     roof_field: str
     roof_types: str
+    boundary: Optional[Path] = Path("data/hamburg_boundary.gpkg")
     out_dir: Path = Path("results_greening")
     lst: Optional[Path] = None
     build_lst: bool = True
@@ -23,6 +24,7 @@ class ScenarioConfig:
     layer: Optional[str] = None
     target_ndvi: Optional[float] = 0.4
     target_albedo: float = 0.20
+    target_ndbi: float = -0.15
     sample_frac: float = 0.1
     min_sample_spacing: float = 100.0
     random_state: int = 42
@@ -32,8 +34,10 @@ class ScenarioConfig:
     write_pred_baseline: bool = False
     keep_null_roof: bool = False
     write_roof_fraction_raster: bool = False
+    write_indices_rasters: bool = False
     log_level: str = "INFO"
     min_roof_area: float = 0.0
+    clip_positive_delta: bool = False
 
     def __post_init__(self) -> None:
         self.l2_folder = Path(self.l2_folder)
@@ -41,3 +45,5 @@ class ScenarioConfig:
         self.out_dir = Path(self.out_dir)
         if self.lst is not None:
             self.lst = Path(self.lst)
+        if self.boundary is not None:
+            self.boundary = Path(self.boundary)

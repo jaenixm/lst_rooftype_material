@@ -25,7 +25,7 @@ python -m pip install -e .            # install locally (PEP 517/518 via pyproje
 green-roof-scenario --help            # show CLI options
 green-roof-scenario \
   --l2_folder data/LC09_L2SP_196023_20250621_20250622_02_T1 \
-  --buildings results/buildings_with_lst.gpkg \
+  --buildings data/building_footprint.gpkg \
   --roof_field predictedroofmaterials \
   --roof_types "concrete, tar_paper" \
   --out_dir results_greening_demo \
@@ -127,16 +127,6 @@ These studies show that **modifying NDVI and Albedo on rooftops** and re-predict
 | `roof_fraction.tif` | (optional) roof coverage per pixel |
 | `buildings_greening_impact.gpkg` | Each building with mean ΔLST |
 | `_greening_provenance.txt` | Documents roof types, NDVI target, parameters |
-
-## Why This Is Scientifically Valid
-
-This method is directly aligned with **recent remote sensing literature**, which uses **remote sensing + empirical regression models** for green roof simulations — instead of heavy simulation tools like ENVI-met.
-
-It is:
-- ✅ **Fast and scalable**
-- ✅ **Fully satellite-based**
-- ✅ **Quantitative and explainable**
-- ✅ **Defensible for urban planning and policy**
 
 ## Methodology Reference
 

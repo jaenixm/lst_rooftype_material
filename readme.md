@@ -11,7 +11,7 @@ python -m pip install -e .            # install locally (PEP 517/518 via pyproje
 green-roof-scenario --help            # show CLI options
 green-roof-scenario \
   --l2_folder data/LC09_L2SP_196023_20250621_20250622_02_T1 \
-  --buildings results/buildings_with_lst.gpkg \
+  --buildings data/building_footprint.gpkg \
   --roof_field predictedroofmaterials \
   --roof_types "concrete, tar_paper" \
   --out_dir results_greening_demo \
@@ -95,14 +95,17 @@ These studies show that **modifying NDVI and Albedo on rooftops** and re-predict
 
 5. **Predict new scenario LST**
    ```
-   delta_LST = scenario_predicted_LST − baseline_predicted_LST
+   delta_LST = scenario_predicted_LST - baseline_observed_LST
    ```
    → **Negative values = cooling effect**
+   - Optional safeguard: `--clip_positive_delta` (cooling-only).
 
 6. **Export results**
    - `delta_LST.tif` → pixel-level cooling map
    - `buildings_greening_impact.gpkg` → per-building mean cooling
+   - Optional `ndvi.tif`, `albedo.tif`, `ndbi.tif` → input indices aligned to LST (enable with `--write_indices_rasters`)
    - Optional `roof_fraction.tif` → visualization of roof pixel influence
+   - `model_feature_importance.txt` → feature importances (RF) or coefficients (linear)
 
 ## Output Overview
 
@@ -110,6 +113,7 @@ These studies show that **modifying NDVI and Albedo on rooftops** and re-predict
 |------|-------------|
 | `scenario_pred_LST.tif` | Predicted LST *after* greening |
 | `delta_LST.tif` | LST change (°C) — negative = cooler |
+| `ndvi.tif`, `albedo.tif`, `ndbi.tif` | (optional) input indices aligned to LST |
 | `roof_fraction.tif` | (optional) roof coverage per pixel |
 | `buildings_greening_impact.gpkg` | Each building with mean ΔLST |
 | `_greening_provenance.txt` | Documents roof types, NDVI target, parameters |
@@ -132,4 +136,3 @@ Highlights from that document:
 - **Scenario blending** – rooftop NDVI and albedo are blended toward realistic green roof
   targets (NDVI≈0.4, albedo≈0.20) proportionally to the supersampled roof fraction,
   matching the procedure detailed in the PDF.
-

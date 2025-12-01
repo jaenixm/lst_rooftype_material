@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from pathlib import Path
 from typing import Sequence
 
 from .config import ScenarioConfig
@@ -43,6 +44,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--out_dir", default="results_greening", help="Output folder.")
     parser.add_argument(
+        "--boundary",
+        default="data/hamburg_boundary.gpkg",
+        help="Clip training/prediction to this boundary (default: %(default)s). Pass '' to skip clipping.",
+    )
+    parser.add_argument(
         "--l2_folder",
         required=True,
         help="Path to Landsat L2 scene folder (used to compute NDVI, Albedo, and NDBI).",
@@ -58,6 +64,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         default=0.20,
         help="Target broadband albedo for green roofs (default: 0.20).",
+    )
+    parser.add_argument(
+        "--target_ndbi",
+        type=float,
+        default=-0.15,
+        help="Target NDBI for green roofs (default: -0.15). Lower values = less 'built-up'.",
     )
     parser.add_argument(
         "--sample_frac",
@@ -81,7 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--supersample",
         type=int,
-        default=4,
+        default=8,
         help="Supersampling factor to estimate roof fraction per pixel (default: 4).",
     )
     parser.add_argument(
@@ -105,10 +117,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write the per-pixel roof fraction raster (0..1) to the output folder.",
     )
     parser.add_argument(
+        "--write_indices_rasters",
+        action="store_true",
+        help="Write NDVI, albedo, and NDBI rasters aligned to the baseline LST.",
+    )
+    parser.add_argument(
         "--min_roof_area",
         type=float,
         default=0.0,
         help="Minimum roof area in square meters to consider for greening (default: 0).",
+    )
+    parser.add_argument(
+        "--clip_positive_delta",
+        action="store_true",
+        help="Set any positive delta values to 0 (cooling-only output).",
     )
     parser.add_argument(
         "--log_level",
@@ -122,11 +144,15 @@ def build_parser() -> argparse.ArgumentParser:
 def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
     parser = build_parser()
     args = parser.parse_args(argv)
+    boundary = args.boundary
+    boundary_path = Path(boundary) if boundary and boundary.strip() else None
+
     config = ScenarioConfig(
         l2_folder=args.l2_folder,
         buildings=args.buildings,
         roof_field=args.roof_field,
         roof_types=args.roof_types,
+        boundary=boundary_path,
         out_dir=args.out_dir,
         lst=args.lst,
         build_lst=args.build_lst,
@@ -135,6 +161,7 @@ def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
         layer=args.layer,
         target_ndvi=args.target_ndvi,
         target_albedo=args.target_albedo,
+        target_ndbi=args.target_ndbi,
         sample_frac=args.sample_frac,
         min_sample_spacing=args.min_sample_spacing,
         random_state=args.random_state,
@@ -144,8 +171,10 @@ def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
         write_pred_baseline=args.write_pred_baseline,
         keep_null_roof=args.keep_null_roof,
         write_roof_fraction_raster=args.write_roof_fraction_raster,
+        write_indices_rasters=args.write_indices_rasters,
         log_level=args.log_level,
         min_roof_area=args.min_roof_area,
+        clip_positive_delta=args.clip_positive_delta,
     )
     return config
 

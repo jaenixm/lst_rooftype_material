@@ -10,6 +10,9 @@ from typing import Optional
 import numpy as np
 import geopandas as gpd
 from rasterstats import zonal_stats
+from rasterio.io import MemoryFile
+from rasterio.mask import mask
+from shapely.geometry import mapping
 
 from .config import ScenarioConfig
 from .io import read_raster, save_raster
@@ -28,6 +31,40 @@ class ScenarioOutputs:
     buildings_layer: Path
     baseline_pred_raster: Optional[Path] = None
     roof_fraction_raster: Optional[Path] = None
+    feature_importance: Optional[Path] = None
+
+
+def _load_boundary(boundary_path: Path, target_crs) -> tuple[list[dict], gpd.GeoDataFrame]:
+    boundary = gpd.read_file(boundary_path)
+    if boundary.empty:
+        raise ValueError(f"Boundary layer {boundary_path} is empty.")
+    boundary = boundary[boundary.geometry.notnull()].copy()
+    boundary = boundary.to_crs(target_crs)
+    geom = boundary.geometry.unary_union
+    if geom.is_empty:
+        raise ValueError(f"Boundary layer {boundary_path} has no geometry after reprojecting to the raster CRS.")
+    return [mapping(geom)], boundary
+
+
+def _clip_raster_to_boundary(arr: np.ndarray, profile: dict, geoms: list[dict]) -> tuple[np.ndarray, dict]:
+    tmp_profile = profile.copy()
+    tmp_profile.setdefault("driver", "GTiff")
+    tmp_profile.update(count=1)
+    with MemoryFile() as memfile:
+        with memfile.open(**tmp_profile) as ds:
+            ds.write(arr, 1)
+            clipped, out_transform = mask(ds, geoms, crop=True)
+            out_profile = ds.profile.copy()
+            out_profile.update(
+                height=clipped.shape[1],
+                width=clipped.shape[2],
+                transform=out_transform,
+                nodata=np.nan,
+                dtype="float32",
+                count=1,
+            )
+    clipped_arr = np.ma.filled(clipped, np.nan).astype("float32")[0]
+    return clipped_arr, out_profile
 
 
 def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
@@ -52,12 +89,22 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     template_profile = lst_profile
 
+    boundary_geoms: Optional[list[dict]] = None
+    boundary_gdf: Optional[gpd.GeoDataFrame] = None
+    if config.boundary:
+        boundary_geoms, boundary_gdf = _load_boundary(config.boundary, template_profile["crs"])
+
     if config.layer:
         buildings = gpd.read_file(config.buildings, layer=config.layer)
     else:
         buildings = gpd.read_file(config.buildings)
     if buildings.crs != template_profile["crs"]:
         buildings = buildings.to_crs(template_profile["crs"])
+    if boundary_gdf is not None:
+        buildings = gpd.clip(buildings, boundary_gdf)
+        buildings = buildings[buildings.geometry.notnull()].copy()
+        if buildings.empty:
+            raise ValueError("No buildings intersect the provided boundary.")
 
     bld_green = subset_buildings(
         buildings,
@@ -73,6 +120,20 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     ndvi, albedo, ndbi, _ = compute_ndvi_albedo_from_l2(config.l2_folder, lst_path)
 
+    if boundary_geoms is not None:
+        base_profile = template_profile.copy()
+        lst, template_profile = _clip_raster_to_boundary(lst, base_profile, boundary_geoms)
+        ndvi, _ = _clip_raster_to_boundary(ndvi, base_profile, boundary_geoms)
+        albedo, _ = _clip_raster_to_boundary(albedo, base_profile, boundary_geoms)
+        ndbi, _ = _clip_raster_to_boundary(ndbi, base_profile, boundary_geoms)
+        if config.build_lst:
+            save_raster(lst_path, lst, template_profile)
+
+    if config.write_indices_rasters:
+        save_raster(out_dir / "ndvi.tif", ndvi.astype("float32"), template_profile)
+        save_raster(out_dir / "albedo.tif", albedo.astype("float32"), template_profile)
+        save_raster(out_dir / "ndbi.tif", ndbi.astype("float32"), template_profile)
+
     if config.target_ndvi is None:
         valid = np.isfinite(ndvi) & np.isfinite(lst)
         veg = ndvi[valid & (ndvi > 0.3)]
@@ -80,6 +141,7 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     else:
         target_ndvi = float(config.target_ndvi)
     target_albedo = float(config.target_albedo)
+    target_ndbi = float(config.target_ndbi)
 
     pixel_size = abs(template_profile["transform"].a)
     if config.min_sample_spacing > 0:
@@ -105,10 +167,27 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         metrics["rmse_train"],
         metrics["rmse_test"],
     )
+    feat_report = out_dir / "model_feature_importance.txt"
+    feature_importance_path: Optional[Path] = None
+    if hasattr(model, "feature_importances_"):
+        vals = model.feature_importances_
+        names = ["ndvi", "albedo", "ndbi"]
+        lines = [f"{n}: {v:.4f}" for n, v in zip(names, vals)]
+        feat_report.write_text("Random Forest feature importances (sum=1):\n" + "\n".join(lines), encoding="utf-8")
+        feature_importance_path = feat_report
+        logger.info("Feature importances saved to %s", feat_report)
+    elif hasattr(model, "coef_"):
+        vals = model.coef_
+        names = ["ndvi", "albedo", "ndbi"]
+        lines = [f"{n}: {v:.4f}" for n, v in zip(names, vals)]
+        feat_report.write_text("Linear model coefficients:\n" + "\n".join(lines), encoding="utf-8")
+        feature_importance_path = feat_report
+        logger.info("Linear coefficients saved to %s", feat_report)
+
+    baseline_pred = predict_model(model, ndvi, albedo, ndbi)
 
     baseline_pred_path = None
     if config.write_pred_baseline:
-        baseline_pred = predict_model(model, ndvi, albedo, ndbi)
         baseline_pred_path = out_dir / "baseline_pred_LST.tif"
         save_raster(baseline_pred_path, baseline_pred, template_profile)
 
@@ -129,27 +208,57 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     scen_ndvi = (1.0 - f) * ndvi + f * target_ndvi
     scen_albedo = (1.0 - f) * albedo + f * target_albedo
+    scen_ndbi = (1.0 - f) * ndbi + f * target_ndbi
 
-    scen_pred = predict_partial(model, scen_ndvi, scen_albedo, pred_mask, ndbi)
-    baseline_partial = predict_partial(model, ndvi, albedo, pred_mask, ndbi)
+    scen_pred = predict_partial(model, scen_ndvi, scen_albedo, pred_mask, scen_ndbi)
 
-    scen_pred_filled = scen_pred.copy()
-    baseline_pred_filled = baseline_partial.copy()
-    scen_pred_filled[~pred_mask] = lst[~pred_mask]
-    baseline_pred_filled[~pred_mask] = lst[~pred_mask]
-
+    # 2. Calculate Delta: Scenario Prediction - Baseline Prediction
+    # This isolates the effect of the green roof by canceling out the model's bias.
     delta = np.zeros(ndvi.shape, dtype="float32")
-    diff = scen_pred_filled - baseline_pred_filled
-    mfin = pred_mask & np.isfinite(diff)
-    delta[mfin] = diff[mfin]
+    
+    # Ensure we only calculate delta where we have valid predictions AND valid input data
+    mfin = pred_mask & np.isfinite(scen_pred) & np.isfinite(baseline_pred) & valid_lsts
+    
+    # THE FIX: Subtract baseline_pred, NOT lst
+    delta[mfin] = scen_pred[mfin] - baseline_pred[mfin]
+
+    if config.clip_positive_delta:
+        # Optional: keep only cooling effects; warmings are nulled out
+        delta[(delta > 0) & np.isfinite(delta)] = 0.0
+
+    # 3. Create the final "Scenario Absolute Temperature" raster
+    # Instead of pasting the raw model prediction (which has bias) into the observed LST,
+    # we apply the clean 'delta' to the observed 'lst'. 
+    # This prevents visual "seams" between changed and unchanged pixels.
+    scen_pred_filled = lst.copy()
+    scen_pred_filled[mfin] = lst[mfin] + delta[mfin]
+
+    # Handle NaNs for output
     delta[~valid_lsts] = np.nan
+    scen_pred_filled[~valid_lsts] = np.nan
 
     scenario_raster = out_dir / "scenario_pred_LST.tif"
     delta_raster = out_dir / "delta_LST.tif"
     save_raster(scenario_raster, scen_pred_filled, template_profile)
     save_raster(delta_raster, delta, template_profile)
 
-    stats = zonal_stats(
+    baseline_stats = zonal_stats(
+        buildings,
+        lst,
+        affine=template_profile["transform"],
+        nodata=np.nan,
+        stats=["mean"],
+        all_touched=True,
+    )
+    scenario_stats = zonal_stats(
+        buildings,
+        scen_pred_filled,
+        affine=template_profile["transform"],
+        nodata=np.nan,
+        stats=["mean"],
+        all_touched=True,
+    )
+    delta_stats = zonal_stats(
         buildings,
         delta,
         affine=template_profile["transform"],
@@ -158,13 +267,16 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         all_touched=True,
     )
     buildings = buildings.copy()
-    buildings["delta_mean"] = [z["mean"] for z in stats]
+    buildings["lst_baseline_mean"] = [z["mean"] for z in baseline_stats]
+    buildings["lst_scenario_mean"] = [z["mean"] for z in scenario_stats]
+    buildings["delta_mean"] = [z["mean"] for z in delta_stats]
 
     buildings_layer = out_dir / "buildings_greening_impact.gpkg"
     buildings.to_file(buildings_layer, driver="GPKG")
 
     provenance = (
         f"Roof types converted: {config.roof_types}\n"
+        f"Boundary: {config.boundary if config.boundary else 'None'}\n"
         f"Target NDVI: {target_ndvi}\n"
         f"Target Albedo: {target_albedo}\n"
         f"LST source: {'built from L2 folder' if config.build_lst else lst_path}\n"
@@ -187,4 +299,5 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         buildings_layer=buildings_layer,
         baseline_pred_raster=baseline_pred_path,
         roof_fraction_raster=roof_fraction_raster,
+        feature_importance=feature_importance_path,
     )

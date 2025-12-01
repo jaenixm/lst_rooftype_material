@@ -1,0 +1,9 @@
+Roof types converted: 0, 4
+Boundary: data/hamburg_boundary.gpkg
+Target NDVI: 0.5798
+Target Albedo: 0.1451
+LST source: built from L2 folder
+Supersample: 8
+Model type: rf
+Used NDBI predictor: yes
+LST build options: unit=celsius, keep_water=False
