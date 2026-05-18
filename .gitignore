@@ -1,0 +1,48 @@
+# OS and editor noise
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Build artifacts
+build/
+dist/
+site/
+
+# Local geospatial inputs, derived products, and generated outputs
+data/raw/
+data/processed/
+outputs/
+docs/literature/
+
+# Large geospatial/vector/raster sidecars anywhere else
+*.tif
+*.TIF
+*.tiff
+*.TIFF
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.qgz
+*.qml
+*.aux.xml
+
+# Local recovery/inventory manifests
+.repo_recovery_manifest/

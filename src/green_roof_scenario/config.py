@@ -13,9 +13,13 @@ __all__ = ["ScenarioConfig"]
 class ScenarioConfig:
     l2_folder: Path
     buildings: Path
-    roof_field: str
-    roof_types: str
-    boundary: Optional[Path] = Path("data/hamburg_boundary.gpkg")
+    roof_material_field: str | None = "predictedrooftypematerial"
+    roof_materials_type: str | None = None
+    roof_shape_field: str | None = None
+    roof_shape_type: str | None = None
+    roof_slope_field: str | None = "roof_slope_mean_deg"
+    max_roof_slope_deg: float | None = None
+    boundary: Optional[Path] = None
     out_dir: Path = Path("results_greening")
     lst: Optional[Path] = None
     build_lst: bool = True

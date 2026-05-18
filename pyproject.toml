@@ -22,7 +22,9 @@ dependencies = [
 
 [project.scripts]
 green-roof-scenario = "green_roof_scenario.cli:main"
+green-roof-fetch-osm = "green_roof_scenario.osm_green_roofs:main"
+green-roof-params = "green_roof_scenario.green_roof_params:main"
+green-roof-enrich-slopes = "green_roof_scenario.citygml_slopes:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

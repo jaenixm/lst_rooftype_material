@@ -12,7 +12,7 @@ import geopandas as gpd
 from rasterstats import zonal_stats
 from rasterio.io import MemoryFile
 from rasterio.mask import mask
-from shapely.geometry import mapping
+from shapely.geometry import box, mapping
 
 from .config import ScenarioConfig
 from .io import read_raster, save_raster
@@ -29,6 +29,7 @@ class ScenarioOutputs:
     scenario_raster: Path
     delta_raster: Path
     buildings_layer: Path
+    stats_report: Optional[Path] = None
     baseline_pred_raster: Optional[Path] = None
     roof_fraction_raster: Optional[Path] = None
     feature_importance: Optional[Path] = None
@@ -44,6 +45,16 @@ def _load_boundary(boundary_path: Path, target_crs) -> tuple[list[dict], gpd.Geo
     if geom.is_empty:
         raise ValueError(f"Boundary layer {boundary_path} has no geometry after reprojecting to the raster CRS.")
     return [mapping(geom)], boundary
+
+
+def _building_extent_boundary(buildings: gpd.GeoDataFrame, target_crs) -> tuple[list[dict], gpd.GeoDataFrame]:
+    if buildings.empty:
+        raise ValueError("Cannot derive an extent from an empty building layer.")
+    extent = box(*buildings.total_bounds)
+    if extent.is_empty:
+        raise ValueError("Cannot derive a valid extent from the building layer.")
+    boundary = gpd.GeoDataFrame([{"source": "building_extent"}], geometry=[extent], crs=target_crs)
+    return [mapping(extent)], boundary
 
 
 def _clip_raster_to_boundary(arr: np.ndarray, profile: dict, geoms: list[dict]) -> tuple[np.ndarray, dict]:
@@ -89,27 +100,41 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     template_profile = lst_profile
 
-    boundary_geoms: Optional[list[dict]] = None
-    boundary_gdf: Optional[gpd.GeoDataFrame] = None
-    if config.boundary:
-        boundary_geoms, boundary_gdf = _load_boundary(config.boundary, template_profile["crs"])
-
     if config.layer:
         buildings = gpd.read_file(config.buildings, layer=config.layer)
     else:
         buildings = gpd.read_file(config.buildings)
+    if buildings.empty:
+        raise ValueError(f"Building layer {config.buildings} is empty.")
+    buildings = buildings[buildings.geometry.notnull()].copy()
+    if buildings.empty:
+        raise ValueError(f"Building layer {config.buildings} has no valid geometries.")
     if buildings.crs != template_profile["crs"]:
         buildings = buildings.to_crs(template_profile["crs"])
+
+    boundary_geoms: Optional[list[dict]] = None
+    boundary_gdf: Optional[gpd.GeoDataFrame] = None
+    clip_source = "building_extent"
+    if config.boundary:
+        boundary_geoms, boundary_gdf = _load_boundary(config.boundary, template_profile["crs"])
+        clip_source = str(config.boundary)
+    else:
+        boundary_geoms, boundary_gdf = _building_extent_boundary(buildings, template_profile["crs"])
+
     if boundary_gdf is not None:
         buildings = gpd.clip(buildings, boundary_gdf)
         buildings = buildings[buildings.geometry.notnull()].copy()
         if buildings.empty:
-            raise ValueError("No buildings intersect the provided boundary.")
+            raise ValueError("No buildings intersect the analysis extent.")
 
     bld_green = subset_buildings(
         buildings,
-        config.roof_field,
-        config.roof_types,
+        config.roof_material_field,
+        config.roof_materials_type,
+        roof_shape_field=config.roof_shape_field,
+        roof_shape_type=config.roof_shape_type,
+        roof_slope_field=config.roof_slope_field,
+        max_roof_slope_deg=config.max_roof_slope_deg,
         keep_null_roof=config.keep_null_roof,
     )
     if config.min_roof_area > 0:
@@ -242,6 +267,15 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     save_raster(scenario_raster, scen_pred_filled, template_profile)
     save_raster(delta_raster, delta, template_profile)
 
+    # City-wide raster statistic: mean cooling (baseline LST - scenario LST)
+    stats_report_path: Optional[Path] = None
+    valid_city_mask = np.isfinite(lst) & np.isfinite(scen_pred_filled)
+    city_mean_cooling = float("nan")
+    if np.any(valid_city_mask):
+        city_mean_cooling = float(np.nanmean(lst[valid_city_mask] - scen_pred_filled[valid_city_mask]))
+    else:
+        logger.warning("No valid pixels available to compute city-wide mean cooling.")
+
     baseline_stats = zonal_stats(
         buildings,
         lst,
@@ -270,13 +304,70 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     buildings["lst_baseline_mean"] = [z["mean"] for z in baseline_stats]
     buildings["lst_scenario_mean"] = [z["mean"] for z in scenario_stats]
     buildings["delta_mean"] = [z["mean"] for z in delta_stats]
+    buildings["cooling_mean"] = buildings["lst_baseline_mean"] - buildings["lst_scenario_mean"]
+    buildings["roof_area_m2"] = buildings.geometry.area.astype("float32")
+
+    cooling_valid = buildings[np.isfinite(buildings["cooling_mean"])].copy()
+    cooling_valid = cooling_valid[np.isfinite(cooling_valid["roof_area_m2"])]
+
+    def _aggregate_stats(df: gpd.GeoDataFrame) -> tuple[float, float, float, Optional[str]]:
+        if df.empty:
+            return float("nan"), float("nan"), float("nan"), None
+        avg = float(df["cooling_mean"].mean())
+        total_area = float(df["roof_area_m2"].sum())
+        weighted = float("nan")
+        if total_area > 0:
+            weighted = float(np.average(df["cooling_mean"], weights=df["roof_area_m2"]))
+        max_row = df["cooling_mean"].idxmax()
+        max_val = float(df.loc[max_row, "cooling_mean"])
+        return avg, weighted, max_val, str(max_row)
+
+    all_avg, all_weighted, all_max, all_max_label = _aggregate_stats(cooling_valid)
+
+    changed_mask = cooling_valid["cooling_mean"] > 0.01
+    changed = cooling_valid.loc[changed_mask].copy()
+    ch_avg, ch_weighted, ch_max, ch_max_label = _aggregate_stats(changed)
 
     buildings_layer = out_dir / "buildings_greening_impact.gpkg"
     buildings.to_file(buildings_layer, driver="GPKG")
 
+    # Write a concise statistics report
+    def _fmt(val: float) -> str:
+        return "nan" if val != val or np.isinf(val) else f"{val:.4f}"
+
+    stats_lines = [
+        "Greening statistics",
+        "-------------------",
+        f"Raster mean (baseline - scenario): {_fmt(city_mean_cooling)} °C",
+        "All buildings (city-wide dilution/impact):",
+        f"  Average cooling: {_fmt(all_avg)} °C",
+        f"  Area-weighted average cooling: {_fmt(all_weighted)} °C",
+        f"  Max cooling: {_fmt(all_max)} °C" + (f" (id={all_max_label})" if all_max_label else ""),
+        "Greened/changed buildings (cooling_mean > 0.01 °C):",
+        f"  Average cooling: {_fmt(ch_avg)} °C",
+        f"  Area-weighted average cooling: {_fmt(ch_weighted)} °C",
+        f"  Max cooling: {_fmt(ch_max)} °C" + (f" (id={ch_max_label})" if ch_max_label else ""),
+    ]
+    stats_report_path = out_dir / "_greening_statistics.txt"
+    stats_report_path.write_text("\n".join(stats_lines), encoding="utf-8")
+
+    logger.info(
+        "Cooling stats (°C) | Raster mean (baseline - scenario)=%s | Avg all=%s, weighted all=%s, max all=%s | "
+        "Avg changed=%s, weighted changed=%s, max changed=%s",
+        _fmt(city_mean_cooling),
+        _fmt(all_avg),
+        _fmt(all_weighted),
+        _fmt(all_max),
+        _fmt(ch_avg),
+        _fmt(ch_weighted),
+        _fmt(ch_max),
+    )
+
     provenance = (
-        f"Roof types converted: {config.roof_types}\n"
-        f"Boundary: {config.boundary if config.boundary else 'None'}\n"
+        f"Roof material field/types: {config.roof_material_field} / {config.roof_materials_type}\n"
+        f"Roof shape field/types: {config.roof_shape_field} / {config.roof_shape_type}\n"
+        f"Roof slope field/max deg: {config.roof_slope_field} / {config.max_roof_slope_deg}\n"
+        f"Analysis extent: {clip_source}\n"
         f"Target NDVI: {target_ndvi}\n"
         f"Target Albedo: {target_albedo}\n"
         f"LST source: {'built from L2 folder' if config.build_lst else lst_path}\n"
@@ -297,6 +388,7 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         scenario_raster=scenario_raster,
         delta_raster=delta_raster,
         buildings_layer=buildings_layer,
+        stats_report=stats_report_path,
         baseline_pred_raster=baseline_pred_path,
         roof_fraction_raster=roof_fraction_raster,
         feature_importance=feature_importance_path,

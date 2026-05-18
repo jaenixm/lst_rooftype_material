@@ -33,20 +33,44 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--buildings", required=True, help="Buildings file (GPKG/GeoJSON/shp).")
     parser.add_argument("--layer", default=None, help="Optional layer name inside GPKG.")
     parser.add_argument(
-        "--roof_field",
+        "--roof_material_field",
         default="predictedrooftypematerial",
-        help="Roof type field in the buildings layer.",
+        help="Roof material field in the buildings layer.",
     )
     parser.add_argument(
-        "--roof_types",
-        required=True,
-        help="Comma-separated roof types to convert to green (e.g., 'concrete,bitumen').",
+        "--roof_materials_type",
+        default=None,
+        help="Comma-separated roof material types to convert to green (e.g., 'concrete,bitumen').",
+    )
+    parser.add_argument(
+        "--roof_shape_field",
+        default=None,
+        help="Roof shape field in the buildings layer (optional).",
+    )
+    parser.add_argument(
+        "--roof_shape_type",
+        default=None,
+        help="Comma-separated roof shape values to convert to green (e.g., 'flat,low_slope').",
+    )
+    parser.add_argument(
+        "--roof_slope_field",
+        default="roof_slope_mean_deg",
+        help="Numeric roof slope field in degrees (default: roof_slope_mean_deg).",
+    )
+    parser.add_argument(
+        "--max_roof_slope_deg",
+        type=float,
+        default=None,
+        help="Only green roofs with slope <= this value in degrees (e.g., 15).",
     )
     parser.add_argument("--out_dir", default="results_greening", help="Output folder.")
     parser.add_argument(
         "--boundary",
-        default="data/hamburg_boundary.gpkg",
-        help="Clip training/prediction to this boundary (default: %(default)s). Pass '' to skip clipping.",
+        default=None,
+        help=(
+            "Optional boundary vector for clipping. If omitted, the building layer "
+            "extent is used as the analysis extent."
+        ),
     )
     parser.add_argument(
         "--l2_folder",
@@ -147,11 +171,23 @@ def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
     boundary = args.boundary
     boundary_path = Path(boundary) if boundary and boundary.strip() else None
 
+    has_materials = bool(args.roof_materials_type and args.roof_materials_type.strip())
+    has_shapes = bool(args.roof_shape_type and args.roof_shape_type.strip())
+    has_slope = args.max_roof_slope_deg is not None
+    if not has_materials and not has_shapes and not has_slope:
+        parser.error("Provide at least one of --roof_materials_type, --roof_shape_type, or --max_roof_slope_deg.")
+    if has_slope and args.max_roof_slope_deg < 0:
+        parser.error("--max_roof_slope_deg must be >= 0.")
+
     config = ScenarioConfig(
         l2_folder=args.l2_folder,
         buildings=args.buildings,
-        roof_field=args.roof_field,
-        roof_types=args.roof_types,
+        roof_material_field=args.roof_material_field,
+        roof_materials_type=args.roof_materials_type,
+        roof_shape_field=args.roof_shape_field,
+        roof_shape_type=args.roof_shape_type,
+        roof_slope_field=args.roof_slope_field,
+        max_roof_slope_deg=args.max_roof_slope_deg,
         boundary=boundary_path,
         out_dir=args.out_dir,
         lst=args.lst,

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import ast
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import rasterio
 from rasterio.features import rasterize
 from shapely.geometry import mapping
@@ -50,16 +52,107 @@ def roof_mask_fraction(
 
 def subset_buildings(
     gdf: gpd.GeoDataFrame,
-    roof_field: str,
-    roof_types: str,
+    roof_material_field: str | None,
+    roof_materials_type: str | None,
     *,
+    roof_shape_field: str | None = None,
+    roof_shape_type: str | None = None,
+    roof_slope_field: str | None = None,
+    max_roof_slope_deg: float | None = None,
     keep_null_roof: bool = False,
 ) -> gpd.GeoDataFrame:
-    if roof_field not in gdf.columns:
-        raise KeyError(f"Roof field '{roof_field}' not in buildings.")
+    material_filter = bool(roof_materials_type and roof_materials_type.strip())
+    shape_filter = bool(roof_shape_type and roof_shape_type.strip())
+    slope_filter = max_roof_slope_deg is not None
+
+    if not material_filter and not shape_filter and not slope_filter:
+        raise ValueError("Provide at least one roof material, shape, or slope filter to select roofs.")
+
     df = gdf.copy()
-    if not keep_null_roof:
-        df = df.dropna(subset=[roof_field]).copy()
-    wanted = {t.strip().lower() for t in roof_types.split(",")}
-    sel = df[roof_field].str.lower().isin(wanted)
-    return df.loc[sel].copy()
+    mask = np.ones(len(df), dtype=bool)
+
+    if material_filter:
+        if not roof_material_field:
+            raise ValueError("roof_material_field must be provided when roof_materials_type is set.")
+        if roof_material_field not in df.columns:
+            raise KeyError(f"Roof material field '{roof_material_field}' not in buildings.")
+        normalized_mat = df[roof_material_field].apply(_normalize_roof_value)
+        wanted_mat = {t.strip().lower() for t in roof_materials_type.split(",") if t.strip()}
+        mat_mask = normalized_mat.isin(wanted_mat)
+        if not keep_null_roof:
+            mat_mask &= normalized_mat.notna()
+        mask &= mat_mask
+
+    if shape_filter:
+        if not roof_shape_field:
+            raise ValueError("roof_shape_field must be provided when roof_shape_type is set.")
+        if roof_shape_field not in df.columns:
+            raise KeyError(f"Roof shape field '{roof_shape_field}' not in buildings.")
+        normalized_shape = df[roof_shape_field].apply(_normalize_roof_value)
+        wanted_shape = {t.strip().lower() for t in roof_shape_type.split(",") if t.strip()}
+        shape_mask = normalized_shape.isin(wanted_shape)
+        if not keep_null_roof:
+            shape_mask &= normalized_shape.notna()
+        mask &= shape_mask
+
+    if slope_filter:
+        if not roof_slope_field:
+            raise ValueError("roof_slope_field must be provided when max_roof_slope_deg is set.")
+        if roof_slope_field not in df.columns:
+            raise KeyError(f"Roof slope field '{roof_slope_field}' not in buildings.")
+        normalized_slope = df[roof_slope_field].apply(_normalize_numeric_value)
+        slope_mask = normalized_slope.notna() & (normalized_slope <= float(max_roof_slope_deg))
+        mask &= slope_mask
+
+    return df.loc[mask].copy()
+
+
+def _normalize_roof_value(value: object) -> str | None:
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            try:
+                parsed = ast.literal_eval(stripped)
+            except (ValueError, SyntaxError):
+                parsed = None
+            if isinstance(parsed, (list, tuple, np.ndarray)):
+                return _normalize_roof_value(parsed)
+        value = stripped
+    elif isinstance(value, np.ndarray):
+        if value.size == 0:
+            return None
+        value = value.flat[0]
+    elif isinstance(value, (list, tuple)):
+        if len(value) == 0:
+            return None
+        value = value[0]
+    if pd.isna(value):
+        return None
+    return str(value).strip().lower()
+
+
+def _normalize_numeric_value(value: object) -> float | None:
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            try:
+                parsed = ast.literal_eval(stripped)
+            except (ValueError, SyntaxError):
+                parsed = None
+            if isinstance(parsed, (list, tuple, np.ndarray)):
+                return _normalize_numeric_value(parsed)
+        value = stripped
+    elif isinstance(value, np.ndarray):
+        if value.size == 0:
+            return None
+        value = value.flat[0]
+    elif isinstance(value, (list, tuple)):
+        if len(value) == 0:
+            return None
+        value = value[0]
+    if pd.isna(value):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
