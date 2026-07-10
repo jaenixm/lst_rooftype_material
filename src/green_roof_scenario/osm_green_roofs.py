@@ -23,6 +23,7 @@ DEFAULT_GREEN_VALUES = "yes,true,green,extensive,intensive,vegetated"
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for the OSM green-roof fetcher."""
     parser = argparse.ArgumentParser(
         description="Fetch OSM buildings tagged as already greened roofs for a city."
     )
@@ -103,6 +104,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _request_json(url: str, *, timeout: int, user_agent: str, data: bytes | None = None) -> Any:
+    """Perform an HTTP request and decode its JSON response."""
     req = urllib.request.Request(
         url,
         data=data,
@@ -117,11 +119,13 @@ def _request_json(url: str, *, timeout: int, user_agent: str, data: bytes | None
 
 
 def _slugify(value: str) -> str:
+    """Convert a label into a filesystem-friendly lowercase slug."""
     slug = re.sub(r"[^a-zA-Z0-9]+", "_", value.strip().lower()).strip("_")
     return slug or "city"
 
 
 def _csv_regex(values: str) -> str:
+    """Convert comma-separated literal values into an anchored regex."""
     parts = [re.escape(v.strip()) for v in values.split(",") if v.strip()]
     if not parts:
         raise ValueError("At least one value is required.")
@@ -129,6 +133,7 @@ def _csv_regex(values: str) -> str:
 
 
 def _nominatim_feature_from_city(city: str, base_url: str, timeout: int, user_agent: str) -> dict[str, Any]:
+    """Resolve a city query to the first Nominatim GeoJSON feature."""
     params = urllib.parse.urlencode(
         {
             "format": "geojson",
@@ -150,6 +155,7 @@ def _nominatim_feature_from_relation(
     timeout: int,
     user_agent: str,
 ) -> dict[str, Any] | None:
+    """Look up an OSM relation as a Nominatim GeoJSON feature."""
     params = urllib.parse.urlencode(
         {
             "format": "geojson",
@@ -169,6 +175,7 @@ def _resolve_relation(
     timeout: int,
     user_agent: str,
 ) -> tuple[int, dict[str, Any] | None]:
+    """Resolve either a city query or explicit relation ID to an OSM relation."""
     if relation_id is not None:
         feature = _nominatim_feature_from_relation(relation_id, base_url, timeout, user_agent)
         return relation_id, feature
@@ -189,6 +196,7 @@ def _resolve_relation(
 
 
 def _selector_templates(include_building_parts: bool) -> list[str]:
+    """Return Overpass tag selectors for known green-roof conventions."""
     selectors = [
         '["building"]["roof:material"~"{roof_material_regex}",i]',
         '["building"]["roof:greening"~"{green_value_regex}",i]',
@@ -216,6 +224,7 @@ def _selector_lines(
     roof_material_regex: str,
     green_value_regex: str,
 ) -> list[str]:
+    """Render Overpass selector lines for ways and relations."""
     body_lines: list[str] = []
     for selector in selectors:
         filled = selector.format(
@@ -235,6 +244,7 @@ def _overpass_area_query(
     green_value_regex: str,
     include_building_parts: bool,
 ) -> str:
+    """Build an Overpass query constrained to an administrative area."""
     area_id = 3_600_000_000 + relation_id
     body_lines = _selector_lines(
         _selector_templates(include_building_parts),
@@ -261,6 +271,7 @@ def _overpass_bbox_query(
     green_value_regex: str,
     include_building_parts: bool,
 ) -> str:
+    """Build an Overpass query constrained to a WGS84 bounding box."""
     south, west, north, east = bbox_wgs84
     locator = f"({south:.8f},{west:.8f},{north:.8f},{east:.8f})"
     body_lines = _selector_lines(
@@ -279,6 +290,7 @@ out tags geom;
 
 
 def _parse_bbox(value: str) -> tuple[float, float, float, float]:
+    """Parse and validate a south,west,north,east bounding box string."""
     parts = [float(part.strip()) for part in value.split(",") if part.strip()]
     if len(parts) != 4:
         raise ValueError("--bbox must contain four comma-separated numbers: south,west,north,east.")
@@ -293,6 +305,7 @@ def _extent_from_buildings(
     layer: str | None,
     padding: float,
 ) -> tuple[tuple[float, float, float, float], gpd.GeoDataFrame]:
+    """Derive a WGS84 search box and source-CRS extent from buildings."""
     gdf = gpd.read_file(buildings, layer=layer) if layer else gpd.read_file(buildings)
     if gdf.empty:
         raise ValueError(f"Building layer is empty: {buildings}")
@@ -311,6 +324,7 @@ def _extent_from_buildings(
 
 
 def _closed_polygon(coords: Iterable[dict[str, float]]) -> Polygon | None:
+    """Convert Overpass coordinate mappings into a valid closed polygon."""
     pairs = [(float(pt["lon"]), float(pt["lat"])) for pt in coords if "lon" in pt and "lat" in pt]
     if len(pairs) < 3:
         return None
@@ -331,6 +345,7 @@ def _closed_polygon(coords: Iterable[dict[str, float]]) -> Polygon | None:
 
 
 def _relation_geometry(element: dict[str, Any]) -> Polygon | MultiPolygon | None:
+    """Assemble polygonal geometry from an Overpass relation's members."""
     outers: list[Polygon] = []
     inners: list[Polygon] = []
     for member in element.get("members", []):
@@ -365,6 +380,7 @@ def _relation_geometry(element: dict[str, Any]) -> Polygon | MultiPolygon | None
 
 
 def _element_geometry(element: dict[str, Any]) -> Polygon | MultiPolygon | None:
+    """Extract polygonal geometry from an Overpass way or relation."""
     if element.get("type") == "way":
         return _closed_polygon(element.get("geometry") or [])
     if element.get("type") == "relation":
@@ -373,6 +389,7 @@ def _element_geometry(element: dict[str, Any]) -> Polygon | MultiPolygon | None:
 
 
 def _elements_to_gdf(elements: Sequence[dict[str, Any]]) -> gpd.GeoDataFrame:
+    """Convert unique polygonal Overpass elements into a GeoDataFrame."""
     records: list[dict[str, Any]] = []
     geometries: list[Polygon | MultiPolygon] = []
     seen: set[tuple[str, int]] = set()
@@ -405,6 +422,7 @@ def _fetch_green_roofs_from_query(
     timeout: int,
     user_agent: str,
 ) -> gpd.GeoDataFrame:
+    """Execute an Overpass query and return green-roof geometries."""
     payload = urllib.parse.urlencode({"data": query}).encode("utf-8")
     data = _request_json(overpass_url, timeout=timeout, user_agent=user_agent, data=payload)
     return _elements_to_gdf(data.get("elements") or [])
@@ -420,6 +438,7 @@ def fetch_green_roofs_for_relation(
     green_values: str = DEFAULT_GREEN_VALUES,
     include_building_parts: bool = False,
 ) -> gpd.GeoDataFrame:
+    """Fetch tagged green roofs within an OSM administrative relation."""
     query = _overpass_area_query(
         relation_id,
         timeout=timeout,
@@ -440,6 +459,7 @@ def fetch_green_roofs_for_bbox(
     green_values: str = DEFAULT_GREEN_VALUES,
     include_building_parts: bool = False,
 ) -> gpd.GeoDataFrame:
+    """Fetch tagged green roofs within a WGS84 bounding box."""
     query = _overpass_bbox_query(
         bbox_wgs84,
         timeout=timeout,
@@ -451,12 +471,14 @@ def fetch_green_roofs_for_bbox(
 
 
 def _write_vector(gdf: gpd.GeoDataFrame, path: Path) -> None:
+    """Write fetched features using a driver inferred from the output path."""
     path.parent.mkdir(parents=True, exist_ok=True)
     kwargs = {"driver": "GPKG"} if path.suffix.lower() == ".gpkg" else {}
     gdf.to_file(path, **kwargs)
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    """Run the OSM green-roof fetch command-line workflow."""
     args = build_parser().parse_args(argv)
     area_args = [bool(args.city), args.osm_relation_id is not None, args.buildings is not None, bool(args.bbox)]
     if sum(area_args) != 1:

@@ -12,6 +12,7 @@ from .scenario import run_scenario
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for the main scenario workflow."""
     parser = argparse.ArgumentParser(description="Greened roof LST scenario (empirical model).")
     parser.add_argument("--lst", default=None, help="Baseline LST raster (°C), aligned to Landsat grid.")
     parser.add_argument(
@@ -166,6 +167,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
+    """Parse command-line arguments into a validated scenario configuration."""
     parser = build_parser()
     args = parser.parse_args(argv)
     boundary = args.boundary
@@ -218,6 +220,7 @@ def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    """Run the green-roof scenario command-line entry point."""
     config = parse_args(argv)
     log_level = getattr(logging, config.log_level)
     logging.basicConfig(level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")

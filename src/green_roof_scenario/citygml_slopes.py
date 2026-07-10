@@ -37,6 +37,7 @@ class RoofSlopeStats:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for CityGML slope enrichment."""
     parser = argparse.ArgumentParser(
         description="Add area-weighted CityGML roof slope metrics to a building vector layer."
     )
@@ -75,6 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    """Run the CityGML slope-enrichment command-line workflow."""
     parser = build_parser()
     args = parser.parse_args(argv)
     logging.basicConfig(
@@ -106,6 +108,7 @@ def enrich_buildings_with_citygml_slopes(
     replace_existing_fields: bool = False,
     overwrite_output: bool = False,
 ) -> Path:
+    """Join CityGML roof-slope statistics onto a building vector layer."""
     buildings_path = Path(buildings_path)
     citygml_dir = Path(citygml_dir)
     out_path = Path(out_path)
@@ -173,6 +176,7 @@ def extract_citygml_roof_slope_stats(
     target_ids: set[str],
     low_slope_threshold_deg: float = DEFAULT_LOW_SLOPE_THRESHOLD_DEG,
 ) -> dict[str, RoofSlopeStats]:
+    """Extract slope statistics for target building IDs from CityGML files."""
     stats: dict[str, RoofSlopeStats] = {}
     remaining = set(target_ids)
     duplicate_count = 0
@@ -221,6 +225,7 @@ def _extract_building_slope_stats(
     gml_id: str,
     low_slope_threshold_deg: float,
 ) -> RoofSlopeStats | None:
+    """Summarize usable roof planes for one CityGML building element."""
     roof_type = _child_text(building, BLDG_NS + "roofType")
     slopes: list[float] = []
     areas: list[float] = []
@@ -266,6 +271,7 @@ def _extract_building_slope_stats(
 
 
 def _target_ids(values: pd.Series) -> set[str]:
+    """Normalize non-null building identifiers into a lookup set."""
     ids = values.dropna().astype(str).str.strip()
     return {value for value in ids if value}
 
@@ -277,6 +283,7 @@ def _merge_stats(
     id_field: str,
     replace_existing_fields: bool,
 ) -> gpd.GeoDataFrame:
+    """Merge extracted slope fields into buildings while handling collisions."""
     enrichment_fields = [
         "roof_slope_mean_deg",
         "roof_slope_min_deg",
@@ -303,6 +310,7 @@ def _merge_stats(
 
 
 def _child_text(elem: Element, tag: str) -> str | None:
+    """Return stripped text from a direct child element when present."""
     child = elem.find(tag)
     if child is None or child.text is None:
         return None
@@ -311,6 +319,7 @@ def _child_text(elem: Element, tag: str) -> str | None:
 
 
 def _ring_coords(ring_parent: Element) -> np.ndarray | None:
+    """Parse a GML ring into an array of three-dimensional coordinates."""
     pos_list = ring_parent.find(".//" + GML_NS + "posList")
     if pos_list is not None and pos_list.text:
         coords = _coords_from_pos_list(pos_list)
@@ -331,6 +340,7 @@ def _ring_coords(ring_parent: Element) -> np.ndarray | None:
 
 
 def _coords_from_pos_list(pos_list: Element) -> np.ndarray | None:
+    """Parse a GML posList element into valid three-dimensional vertices."""
     vals = np.fromstring(pos_list.text or "", sep=" ", dtype=float)
     if vals.size < 9:
         return None
@@ -347,6 +357,7 @@ def _coords_from_pos_list(pos_list: Element) -> np.ndarray | None:
 
 
 def _srs_dimension(elem: Element, value_count: int) -> int:
+    """Resolve coordinate dimensionality from metadata or value count."""
     raw = elem.attrib.get("srsDimension")
     if raw:
         try:
@@ -363,12 +374,14 @@ def _srs_dimension(elem: Element, value_count: int) -> int:
 
 
 def _without_closing_point(coords: np.ndarray) -> np.ndarray | None:
+    """Remove a duplicated closing vertex and reject undersized rings."""
     if len(coords) > 1 and np.allclose(coords[0], coords[-1]):
         coords = coords[:-1]
     return coords if len(coords) >= 3 else None
 
 
 def _polygon_area_2d_m2(polygon: Element, exterior_coords: np.ndarray) -> float:
+    """Calculate horizontal polygon area after subtracting interior rings."""
     area = _ring_area_2d_m2(exterior_coords)
     for interior in polygon.findall(GML_NS + "interior"):
         interior_coords = _ring_coords(interior)
@@ -378,12 +391,14 @@ def _polygon_area_2d_m2(polygon: Element, exterior_coords: np.ndarray) -> float:
 
 
 def _ring_area_2d_m2(coords: np.ndarray) -> float:
+    """Calculate the absolute horizontal area of a coordinate ring."""
     x = coords[:, 0]
     y = coords[:, 1]
     return abs(0.5 * float(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))))
 
 
 def _slope_deg(coords: np.ndarray) -> float | None:
+    """Calculate a polygon plane's slope from horizontal in degrees."""
     normal = np.zeros(3, dtype=float)
     for p, q in zip(coords, np.roll(coords, -1, axis=0)):
         normal[0] += (p[1] - q[1]) * (p[2] + q[2])

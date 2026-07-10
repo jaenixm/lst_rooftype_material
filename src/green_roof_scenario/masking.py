@@ -20,6 +20,7 @@ def roof_mask_fraction(
     supersample: int = 4,
     all_touched: bool = False,
 ) -> np.ndarray:
+    """Rasterize buildings into per-pixel roof coverage fractions."""
     if supersample < 1:
         raise ValueError("supersample must be >= 1.")
     shapes = [
@@ -76,6 +77,7 @@ def subset_buildings(
     max_roof_slope_deg: float | None = None,
     keep_null_roof: bool = False,
 ) -> gpd.GeoDataFrame:
+    """Select buildings matching the requested material, shape, and slope filters."""
     material_filter = bool(roof_materials_type and roof_materials_type.strip())
     shape_filter = bool(roof_shape_type and roof_shape_type.strip())
     slope_filter = max_roof_slope_deg is not None
@@ -123,6 +125,7 @@ def subset_buildings(
 
 
 def _normalize_roof_value(value: object) -> str | None:
+    """Normalize scalar or container-like roof attributes for comparison."""
     if isinstance(value, str):
         stripped = value.strip()
         if stripped.startswith("[") and stripped.endswith("]"):
@@ -147,6 +150,7 @@ def _normalize_roof_value(value: object) -> str | None:
 
 
 def _normalize_numeric_value(value: object) -> float | None:
+    """Convert scalar or container-like attributes to a finite-style float value."""
     if isinstance(value, str):
         stripped = value.strip()
         if stripped.startswith("[") and stripped.endswith("]"):

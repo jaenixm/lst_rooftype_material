@@ -22,6 +22,7 @@ DEFAULT_RASTER_NAMES = ("ndvi", "ndbi", "albedo")
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for green-roof parameter estimation."""
     parser = argparse.ArgumentParser(
         description=(
             "Add mean NDVI, NDBI, and albedo to green-roof polygons and report "
@@ -108,6 +109,7 @@ def _resolve_raster_paths(
     albedo: Path | None,
     indices_out_dir: Path | None,
 ) -> dict[str, Path]:
+    """Resolve explicit and inferred paths for all required index rasters."""
     explicit = {"ndvi": ndvi, "ndbi": ndbi, "albedo": albedo}
     if all(path is not None for path in explicit.values()):
         return {name: path for name, path in explicit.items() if path is not None}
@@ -133,6 +135,7 @@ def _derive_missing_indices(
     mask_with_lst: bool,
     overwrite: bool,
 ) -> None:
+    """Derive any missing index rasters from a Landsat Level-2 scene."""
     missing = [path for path in rasters.values() if overwrite or not path.exists()]
     if not missing:
         return
@@ -172,6 +175,7 @@ def _derive_missing_indices(
 
 
 def _read_roofs(path: Path, layer: str | None) -> gpd.GeoDataFrame:
+    """Read and validate a non-empty green-roof vector layer."""
     gdf = gpd.read_file(path, layer=layer) if layer else gpd.read_file(path)
     if gdf.empty:
         raise ValueError(f"Green-roof layer is empty: {path}")
@@ -184,6 +188,7 @@ def _read_roofs(path: Path, layer: str | None) -> gpd.GeoDataFrame:
 
 
 def _zonal_mean(gdf: gpd.GeoDataFrame, raster_path: Path, all_touched: bool) -> list[float]:
+    """Calculate a raster mean for each polygon using windowed reads."""
     if not raster_path.exists():
         raise FileNotFoundError(f"Raster not found: {raster_path}")
     with rasterio.open(raster_path) as src:
@@ -223,6 +228,7 @@ def _zonal_mean(gdf: gpd.GeoDataFrame, raster_path: Path, all_touched: bool) -> 
 
 
 def _area_weights(gdf: gpd.GeoDataFrame, area_crs: str) -> np.ndarray:
+    """Calculate polygon areas in an explicit or automatically selected CRS."""
     if area_crs == "auto":
         try:
             resolved = gdf.estimate_utm_crs()
@@ -236,11 +242,13 @@ def _area_weights(gdf: gpd.GeoDataFrame, area_crs: str) -> np.ndarray:
 
 
 def _finite_pair(values: np.ndarray, weights: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Return values paired with finite, positive area weights."""
     mask = np.isfinite(values) & np.isfinite(weights) & (weights > 0)
     return values[mask], weights[mask]
 
 
 def _summaries(gdf: gpd.GeoDataFrame, weights: np.ndarray) -> list[dict[str, float | int | str]]:
+    """Summarize valid counts and weighted and unweighted index means."""
     rows: list[dict[str, float | int | str]] = []
     for name in DEFAULT_RASTER_NAMES:
         col = f"mean_{name}"
@@ -262,6 +270,7 @@ def _summaries(gdf: gpd.GeoDataFrame, weights: np.ndarray) -> list[dict[str, flo
 
 
 def _format_float(value: float | int | str) -> str:
+    """Format a summary value for stable command-line output."""
     if isinstance(value, str):
         return value
     if isinstance(value, int):
@@ -272,12 +281,14 @@ def _format_float(value: float | int | str) -> str:
 
 
 def _write_vector(gdf: gpd.GeoDataFrame, path: Path) -> None:
+    """Write a vector layer, selecting the GeoPackage driver when needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
     kwargs = {"driver": "GPKG"} if path.suffix.lower() == ".gpkg" else {}
     gdf.to_file(path, **kwargs)
 
 
 def _write_summary_csv(rows: list[dict[str, float | int | str]], path: Path) -> None:
+    """Write aggregate green-roof parameter rows to CSV."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(
@@ -299,6 +310,7 @@ def compute_green_roof_parameters(
     all_touched: bool = True,
     drop_missing: bool = False,
 ) -> tuple[gpd.GeoDataFrame, list[dict[str, float | int | str]]]:
+    """Enrich green roofs with raster means and return aggregate summaries."""
     gdf = _read_roofs(green_roofs, layer)
     for name in DEFAULT_RASTER_NAMES:
         gdf[f"mean_{name}"] = _zonal_mean(gdf, rasters[name], all_touched)
@@ -322,6 +334,7 @@ def compute_green_roof_parameters(
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    """Run the green-roof parameter estimation command-line workflow."""
     args = build_parser().parse_args(argv)
     rasters = _resolve_raster_paths(args.ndvi, args.ndbi, args.albedo, args.indices_out_dir)
     _derive_missing_indices(

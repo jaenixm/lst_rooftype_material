@@ -18,6 +18,7 @@ __all__ = [
 
 
 def _validate_same_shape(**arrays: np.ndarray) -> tuple[int, ...]:
+    """Validate that all named model arrays have one common shape."""
     shapes = {name: arr.shape for name, arr in arrays.items()}
     unique_shapes = set(shapes.values())
     if len(unique_shapes) != 1:
@@ -35,6 +36,7 @@ def sample_model_inputs(
     seed: int,
     block_size: int | None = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """Sample finite predictor and LST pixels, optionally with spatial thinning."""
     _validate_same_shape(lst=lst, ndvi=ndvi, albedo=albedo, ndbi=ndbi)
     if not 0 < frac <= 1:
         raise ValueError("frac must be greater than 0 and at most 1.")
@@ -89,6 +91,7 @@ def fit_model(
     model_type: str = "linear",
     block_size: int | None = None,
 ):
+    """Fit a regression model and return it with train/test metrics."""
     if model_type not in {"linear", "rf"}:
         raise ValueError("model_type must be 'linear' or 'rf'.")
     X, y = sample_model_inputs(lst, ndvi, albedo, ndbi, frac, seed, block_size=block_size)
@@ -125,6 +128,7 @@ def fit_model(
 
 
 def predict_model(model, ndvi: np.ndarray, albedo: np.ndarray, ndbi: np.ndarray) -> np.ndarray:
+    """Predict a full raster while leaving non-finite inputs as NaN."""
     _validate_same_shape(ndvi=ndvi, albedo=albedo, ndbi=ndbi)
     mask = np.isfinite(ndvi) & np.isfinite(albedo) & np.isfinite(ndbi)
     out = np.full(ndvi.shape, np.nan, dtype="float32")
@@ -143,6 +147,7 @@ def predict_partial(
     mask: np.ndarray,
     ndbi: np.ndarray,
 ) -> np.ndarray:
+    """Predict only finite pixels enabled by a supplied boolean mask."""
     _validate_same_shape(ndvi=ndvi, albedo=albedo, ndbi=ndbi, mask=mask)
     out = np.full(ndvi.shape, np.nan, dtype="float32")
     finite_mask = mask & np.isfinite(ndvi) & np.isfinite(albedo) & np.isfinite(ndbi)

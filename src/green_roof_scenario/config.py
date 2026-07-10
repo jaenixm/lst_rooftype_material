@@ -43,6 +43,7 @@ class ScenarioConfig:
     clip_positive_delta: bool = False
 
     def __post_init__(self) -> None:
+        """Normalize paths and validate scenario parameter combinations."""
         self.l2_folder = Path(self.l2_folder)
         self.buildings = Path(self.buildings)
         self.out_dir = Path(self.out_dir)

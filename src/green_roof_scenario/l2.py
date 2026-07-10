@@ -27,10 +27,12 @@ __all__ = [
 
 
 def _qa_bits(arr: np.ndarray, bit: int) -> np.ndarray:
+    """Return a boolean mask for one bit in a Landsat QA array."""
     return ((arr >> bit) & 1).astype(bool)
 
 
 def _build_clear_mask(qa: np.ndarray, keep_water: bool = False) -> np.ndarray:
+    """Build a valid-pixel mask from Landsat QA_PIXEL flags."""
     invalid = (
         _qa_bits(qa, 0)
         | _qa_bits(qa, 1)
@@ -45,6 +47,7 @@ def _build_clear_mask(qa: np.ndarray, keep_water: bool = False) -> np.ndarray:
 
 
 def _find_band(folder: Path | str, suffix: str) -> Optional[str]:
+    """Find exactly one Landsat band matching a filename suffix."""
     folder = Path(folder)
     matches = sorted({*folder.glob(f"*{suffix}.TIF"), *folder.glob(f"*{suffix}.tif")})
     if len(matches) > 1:
@@ -60,6 +63,7 @@ def build_lst_from_l2(
     unit: str = "celsius",
     keep_water: bool = False,
 ) -> Tuple[Path, np.ndarray, dict]:
+    """Scale Landsat ST_B10 to LST, apply QA masking, and write it."""
     if unit not in {"celsius", "kelvin"}:
         raise ValueError("unit must be 'celsius' or 'kelvin'.")
     st_path = _find_band(l2_folder, "_ST_B10")
@@ -129,6 +133,7 @@ def build_lst_from_l2(
 
 
 def _read_rescaled_to_template(path: str, template_profile: dict) -> np.ndarray:
+    """Reproject and scale a surface-reflectance band to a template grid."""
     shape = (template_profile["height"], template_profile["width"])
     destination = np.full(shape, np.nan, dtype="float32")
     with rasterio.open(path) as src:
@@ -150,6 +155,7 @@ def _read_rescaled_to_template(path: str, template_profile: dict) -> np.ndarray:
 
 
 def _load_l2_bands_to_template(l2_folder: Path | str, template_path: Path | str):
+    """Load required Landsat reflectance bands on the template raster grid."""
     b2 = _find_band(l2_folder, "_SR_B2")
     b4 = _find_band(l2_folder, "_SR_B4")
     b5 = _find_band(l2_folder, "_SR_B5")
@@ -179,6 +185,7 @@ def _compute_indices(
     swir1: np.ndarray,
     swir2: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Calculate NDVI, broadband albedo, and NDBI from reflectance arrays."""
     ndvi = (nir - red) / (nir + red + 1e-6)
     ndvi = np.clip(ndvi, -1.0, 1.0)
 
@@ -199,6 +206,7 @@ def _compute_indices(
 
 
 def compute_ndvi_albedo_from_l2(l2_folder: Path | str, template_path: Path | str):
+    """Derive NDVI, albedo, and NDBI from a Landsat Level-2 scene."""
     blue, red, nir, swir1, swir2, profile = _load_l2_bands_to_template(l2_folder, template_path)
     ndvi, albedo, ndbi = _compute_indices(blue, red, nir, swir1, swir2)
     return ndvi, albedo, ndbi, profile

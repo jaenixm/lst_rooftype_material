@@ -53,51 +53,55 @@ At least one selection filter is required. Multiple filters are combined with lo
 
 ## Run a scenario
 
-This example builds a Celsius LST raster from the Landsat scene, selects metal and bitumen roofs, fits the default Random Forest model, and writes diagnostic rasters:
+The examples below use the Hamburg scenario from this project. The completed run selects dominant roof-material classes `0` and `4` (tar paper and concrete), requires mean roof slope `<= 15°`, uses the locally estimated Hamburg green-roof parameters, and rasterizes eligible roofs with supersampling factor `8`.
+
+This is the command used for the reported Hamburg run. It builds a Celsius LST raster from the Hamburg Landsat scene, fits the default Random Forest model on the building extent, and writes the scenario outputs to `hamburg_slope`:
 
 ```bash
 uv run green-roof-scenario \
-  --l2_folder data/raw/landsat/SCENE_FOLDER \
-  --buildings data/processed/buildings/buildings.gpkg \
-  --layer buildings \
-  --roof_material_field roof_material \
-  --roof_materials_type "metal,bitumen" \
+  --l2_folder data/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg \
+  --buildings data/buildings/hamburg-cls-finale-with-slopes_dominant.gpkg \
+  --roof_material_field dominant_material \
+  --roof_materials_type "0,4" \
+  --roof_slope_field roof_slope_mean_deg \
+  --max_roof_slope_deg 15 \
   --build_lst \
-  --out_dir outputs/scenarios/example \
-  --target_ndvi 0.40 \
-  --target_albedo 0.20 \
-  --target_ndbi -0.15 \
+  --out_dir hamburg_slope \
+  --target_ndvi 0.5098841067653748 \
+  --target_albedo 0.1435968737428123 \
+  --target_ndbi -0.15313389460307741 \
   --model rf \
+  --supersample 8 \
   --write_indices_rasters \
-  --write_pred_baseline \
-  --write_roof_fraction_raster
+  --write_pred_baseline
 ```
 
-If you already have a baseline LST raster in Celsius, omit `--build_lst` and pass it directly:
+If the Hamburg baseline LST raster has already been built, omit `--build_lst` and pass it directly. Use a different output directory so the source raster is not overwritten while it is being read:
 
 ```bash
 uv run green-roof-scenario \
-  --lst path/to/baseline_LST.tif \
-  --l2_folder path/to/Landsat_L2_scene \
-  --buildings path/to/buildings.gpkg \
-  --roof_shape_field roof_shape \
-  --roof_shape_type "flat,low_slope" \
-  --out_dir outputs/scenarios/example
+  --lst hamburg_slope/baseline_LST.tif \
+  --l2_folder data/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg \
+  --buildings data/buildings/hamburg-cls-finale-with-slopes_dominant.gpkg \
+  --roof_material_field dominant_material \
+  --roof_materials_type "0,4" \
+  --roof_slope_field roof_slope_mean_deg \
+  --max_roof_slope_deg 15 \
+  --out_dir outputs/scenarios/hamburg_from_existing_lst \
+  --target_ndvi 0.5098841067653748 \
+  --target_albedo 0.1435968737428123 \
+  --target_ndbi -0.15313389460307741 \
+  --model rf \
+  --supersample 8
 ```
 
-When `--boundary` is omitted, the rectangular extent of the building layer becomes the analysis extent. Use an administrative or study-area layer when you need a precise boundary:
+When `--boundary` is omitted, the rectangular extent of the building layer becomes the analysis extent. This is intentional in the reported Hamburg run. In the current implementation, `--boundary` is applied before spatial sampling and model fitting, so adding it changes the fitted model rather than merely cropping the finished outputs. For comparable Hamburg statistics, run the model without `--boundary` and clip the spatial outputs afterward for figures. The current Hamburg deliverables were post-processed using the `verwaltungsgrenzen__landesgrenze` layer in `data/helpers/hamburg_boundary.gpkg`; values inside that boundary were not resampled or recalculated.
+
+The Hamburg material and slope filters are combined with logical AND:
 
 ```bash
---boundary path/to/study_area.gpkg
-```
-
-Slope, material, and shape filters can be combined:
-
-```bash
---roof_material_field roof_material \
---roof_materials_type "metal,bitumen" \
---roof_shape_field roof_shape \
---roof_shape_type "flat" \
+--roof_material_field dominant_material \
+--roof_materials_type "0,4" \
 --roof_slope_field roof_slope_mean_deg \
 --max_roof_slope_deg 15
 ```
@@ -107,7 +111,7 @@ Useful controls include:
 - `--model rf|linear`: Random Forest is the default; linear regression is a simpler deterministic alternative.
 - `--sample_frac 0.1`: fraction of the spatially thinned valid training pool to sample, with a minimum target of 1,000 pixels when available.
 - `--min_sample_spacing 100`: approximate training-sample spacing in raster units (normally metres for projected Landsat data); set `0` to disable thinning.
-- `--supersample 4`: resolution multiplier used to estimate fractional roof coverage in a pixel.
+- `--supersample 8`: Hamburg setting used to estimate fractional eligible-roof coverage in each 30 m Landsat pixel by rasterizing an `8 x 8` subgrid.
 - `--min_roof_area 25`: minimum selected roof area in square metres.
 - `--clip_positive_delta`: replace modeled warming with zero. This is off by default and should only be enabled when a cooling-only product is explicitly required.
 
@@ -157,18 +161,18 @@ This command uses Nominatim and Overpass, so it requires internet access and sho
 ```bash
 uv run green-roof-fetch-osm \
   --city "Hamburg, Germany" \
-  --out data/processed/helpers/hamburg_green_roofs.gpkg \
-  --boundary-out data/processed/helpers/hamburg_boundary.gpkg \
+  --out data/helpers/hamburg_green_roofs.gpkg \
+  --boundary-out data/helpers/hamburg_boundary.gpkg \
   --target-crs EPSG:25832
 ```
 
-Use a building layer's exact extent instead of a city relation:
+Use the Hamburg classified-building layer's exact extent instead of the city relation:
 
 ```bash
 uv run green-roof-fetch-osm \
-  --buildings data/processed/buildings/buildings.gpkg \
+  --buildings data/processed/buildings/hamburg-cls-finale.gpkg \
   --buildings-layer buildings \
-  --out data/processed/helpers/known_green_roofs.gpkg \
+  --out data/helpers/hamburg_green_roofs_building_extent.gpkg \
   --target-crs EPSG:25832
 ```
 
@@ -178,11 +182,11 @@ Calculate per-roof and area-weighted NDVI, NDBI, and albedo values for known gre
 
 ```bash
 uv run green-roof-params \
-  --green-roofs data/processed/helpers/known_green_roofs.gpkg \
-  --l2-folder data/raw/landsat/SCENE_FOLDER \
-  --indices-out-dir outputs/parameter_estimation \
-  --out outputs/parameter_estimation/green_roofs_with_params.gpkg \
-  --summary-csv outputs/parameter_estimation/parameter_summary.csv
+  --green-roofs data/helpers/hamburg_green_roofs.gpkg \
+  --l2-folder data/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg \
+  --indices-out-dir outputs/parameter_estimation/hamburg \
+  --out data/helpers/hamburg_green_roofs_with_params.gpkg \
+  --summary-csv data/helpers/hamburg_green_roof_parameter_summary.csv
 ```
 
 The `area_weighted_mean` values in the summary CSV can be passed to `--target_ndvi`, `--target_ndbi`, and `--target_albedo`.
@@ -193,10 +197,10 @@ Enrich a building layer with area-weighted LoD2 roof-plane slope metrics:
 
 ```bash
 uv run green-roof-enrich-slopes \
-  --buildings data/processed/buildings/buildings.gpkg \
+  --buildings data/processed/buildings/hamburg-cls-finale.gpkg \
   --layer buildings \
-  --citygml-dir data/raw/citygml \
-  --out data/processed/buildings/buildings_with_slopes.gpkg
+  --citygml-dir data/raw/citygml/hamburg_lod2 \
+  --out data/processed/buildings/hamburg-cls-finale-with-slopes.gpkg
 ```
 
 The default scenario slope field is `roof_slope_mean_deg`.
@@ -207,17 +211,19 @@ The default scenario slope field is `roof_slope_mean_deg`.
 from green_roof_scenario import ScenarioConfig, run_scenario
 
 config = ScenarioConfig(
-    l2_folder="data/raw/landsat/SCENE_FOLDER",
-    buildings="data/processed/buildings/buildings.gpkg",
-    layer="buildings",
-    roof_material_field="roof_material",
-    roof_materials_type="metal,bitumen",
-    out_dir="outputs/scenarios/example",
+    l2_folder="data/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+    buildings="data/buildings/hamburg-cls-finale-with-slopes_dominant.gpkg",
+    roof_material_field="dominant_material",
+    roof_materials_type="0,4",
+    roof_slope_field="roof_slope_mean_deg",
+    max_roof_slope_deg=15,
+    out_dir="hamburg_slope",
     build_lst=True,
-    target_ndvi=0.4,
-    target_albedo=0.2,
-    target_ndbi=-0.15,
+    target_ndvi=0.5098841067653748,
+    target_albedo=0.1435968737428123,
+    target_ndbi=-0.15313389460307741,
     model="rf",
+    supersample=8,
 )
 
 outputs = run_scenario(config)

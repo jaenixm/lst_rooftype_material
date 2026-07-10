@@ -35,6 +35,7 @@ class ScenarioOutputs:
 
 
 def _load_boundary(boundary_path: Path, target_crs) -> tuple[list[dict], gpd.GeoDataFrame]:
+    """Load, validate, and reproject an analysis boundary."""
     boundary = gpd.read_file(boundary_path)
     if boundary.empty:
         raise ValueError(f"Boundary layer {boundary_path} is empty.")
@@ -50,6 +51,7 @@ def _load_boundary(boundary_path: Path, target_crs) -> tuple[list[dict], gpd.Geo
 
 
 def _building_extent_boundary(buildings: gpd.GeoDataFrame, target_crs) -> tuple[list[dict], gpd.GeoDataFrame]:
+    """Create a rectangular analysis boundary from building bounds."""
     if buildings.empty:
         raise ValueError("Cannot derive an extent from an empty building layer.")
     extent = box(*buildings.total_bounds)
@@ -75,6 +77,7 @@ def _geometry_area_m2(buildings: gpd.GeoDataFrame) -> np.ndarray:
 
 
 def _clip_raster_to_boundary(arr: np.ndarray, profile: dict, geoms: list[dict]) -> tuple[np.ndarray, dict]:
+    """Clip an in-memory raster array and update its output profile."""
     tmp_profile = profile.copy()
     tmp_profile.setdefault("driver", "GTiff")
     tmp_profile.update(count=1, dtype="float32", nodata=np.nan)
@@ -96,6 +99,7 @@ def _clip_raster_to_boundary(arr: np.ndarray, profile: dict, geoms: list[dict]) 
 
 
 def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
+    """Execute the complete green-roof intervention scenario workflow."""
     out_dir = config.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -134,8 +138,8 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     if buildings.crs != template_profile["crs"]:
         buildings = buildings.to_crs(template_profile["crs"])
 
-    boundary_geoms: Optional[list[dict]] = None
-    boundary_gdf: Optional[gpd.GeoDataFrame] = None
+    boundary_geoms: list[dict] | None = None
+    boundary_gdf: gpd.GeoDataFrame | None = None
     clip_source = "building_extent"
     if config.boundary:
         boundary_geoms, boundary_gdf = _load_boundary(config.boundary, template_profile["crs"])
@@ -346,6 +350,7 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     cooling_valid = cooling_valid[np.isfinite(cooling_valid["roof_area_m2"])]
 
     def _aggregate_stats(df: gpd.GeoDataFrame) -> tuple[float, float, float, str | None]:
+        """Calculate mean, area-weighted mean, and maximum building cooling."""
         if df.empty:
             return float("nan"), float("nan"), float("nan"), None
         avg = float(df["cooling_mean"].mean())
@@ -367,6 +372,7 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     # Write a concise statistics report
     def _fmt(val: float) -> str:
+        """Format a finite statistic or return a stable NaN marker."""
         return "nan" if val != val or np.isinf(val) else f"{val:.4f}"
 
     stats_lines = [
