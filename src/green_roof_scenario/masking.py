@@ -20,7 +20,15 @@ def roof_mask_fraction(
     supersample: int = 4,
     all_touched: bool = False,
 ) -> np.ndarray:
-    shapes = [mapping(geom) for geom in buildings_gdf.geometry.values]
+    if supersample < 1:
+        raise ValueError("supersample must be >= 1.")
+    shapes = [
+        mapping(geom)
+        for geom in buildings_gdf.geometry.values
+        if geom is not None and not geom.is_empty
+    ]
+    if not shapes:
+        raise ValueError("No non-empty building geometries are available for rasterization.")
     height, width = template_profile["height"], template_profile["width"]
     transform = template_profile["transform"]
 
@@ -31,13 +39,20 @@ def roof_mask_fraction(
             transform=transform,
             fill=0,
             default_value=1,
-            all_touched=True,
+            all_touched=all_touched,
         ).astype("float32")
         return mask
 
     hss, wss = height * supersample, width * supersample
     a, b, c, d, e, f = transform[:6]
-    up_transform = rasterio.Affine(a / supersample, b, c, d, e / supersample, f)
+    up_transform = rasterio.Affine(
+        a / supersample,
+        b / supersample,
+        c,
+        d / supersample,
+        e / supersample,
+        f,
+    )
     up = rasterize(
         shapes,
         out_shape=(hss, wss),
@@ -79,8 +94,8 @@ def subset_buildings(
         normalized_mat = df[roof_material_field].apply(_normalize_roof_value)
         wanted_mat = {t.strip().lower() for t in roof_materials_type.split(",") if t.strip()}
         mat_mask = normalized_mat.isin(wanted_mat)
-        if not keep_null_roof:
-            mat_mask &= normalized_mat.notna()
+        if keep_null_roof:
+            mat_mask |= normalized_mat.isna()
         mask &= mat_mask
 
     if shape_filter:
@@ -91,8 +106,8 @@ def subset_buildings(
         normalized_shape = df[roof_shape_field].apply(_normalize_roof_value)
         wanted_shape = {t.strip().lower() for t in roof_shape_type.split(",") if t.strip()}
         shape_mask = normalized_shape.isin(wanted_shape)
-        if not keep_null_roof:
-            shape_mask &= normalized_shape.notna()
+        if keep_null_roof:
+            shape_mask |= normalized_shape.isna()
         mask &= shape_mask
 
     if slope_filter:

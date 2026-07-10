@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 __all__ = ["ScenarioConfig"]
 
@@ -19,9 +18,9 @@ class ScenarioConfig:
     roof_shape_type: str | None = None
     roof_slope_field: str | None = "roof_slope_mean_deg"
     max_roof_slope_deg: float | None = None
-    boundary: Optional[Path] = None
+    boundary: Path | None = None
     out_dir: Path = Path("results_greening")
-    lst: Optional[Path] = None
+    lst: Path | None = None
     build_lst: bool = True
     lst_unit: str = "celsius"
     keep_lst_water: bool = False
@@ -51,3 +50,33 @@ class ScenarioConfig:
             self.lst = Path(self.lst)
         if self.boundary is not None:
             self.boundary = Path(self.boundary)
+
+        has_materials = bool(self.roof_materials_type and self.roof_materials_type.strip())
+        has_shapes = bool(self.roof_shape_type and self.roof_shape_type.strip())
+        has_slope = self.max_roof_slope_deg is not None
+        if not has_materials and not has_shapes and not has_slope:
+            raise ValueError(
+                "Provide at least one roof material, shape, or maximum-slope filter."
+            )
+        if not self.build_lst and self.lst is None:
+            raise ValueError("Provide lst or set build_lst=True.")
+        if self.lst_unit not in {"celsius", "kelvin"}:
+            raise ValueError("lst_unit must be 'celsius' or 'kelvin'.")
+        if self.model not in {"linear", "rf"}:
+            raise ValueError("model must be 'linear' or 'rf'.")
+        if not 0 < self.sample_frac <= 1:
+            raise ValueError("sample_frac must be greater than 0 and at most 1.")
+        if self.min_sample_spacing < 0:
+            raise ValueError("min_sample_spacing must be >= 0.")
+        if self.supersample < 1:
+            raise ValueError("supersample must be >= 1.")
+        if self.min_roof_area < 0:
+            raise ValueError("min_roof_area must be >= 0.")
+        if self.max_roof_slope_deg is not None and self.max_roof_slope_deg < 0:
+            raise ValueError("max_roof_slope_deg must be >= 0.")
+        if self.target_ndvi is not None and not -1 <= self.target_ndvi <= 1:
+            raise ValueError("target_ndvi must be between -1 and 1, or None.")
+        if not 0 <= self.target_albedo <= 1:
+            raise ValueError("target_albedo must be between 0 and 1.")
+        if not -1 <= self.target_ndbi <= 1:
+            raise ValueError("target_ndbi must be between -1 and 1.")

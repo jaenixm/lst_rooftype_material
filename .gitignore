@@ -1,40 +1,48 @@
-# OS and editor noise
+# Operating-system and editor files
 .DS_Store
 *.swp
 *.swo
 .idea/
 .vscode/
 
-# Python caches and local environments
+# Python environments, caches, and build products
+.venv/
+.conda/
+venv/
+env/
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
-.ruff_cache/
 .mypy_cache/
+.ruff_cache/
 .coverage
 htmlcov/
-.venv/
-venv/
-env/
-
-# Build artifacts
 build/
 dist/
 site/
 
-# Local geospatial inputs, derived products, and generated outputs
-data/raw/
-data/processed/
-outputs/
-docs/literature/
+# Local recovery metadata
+.repo_recovery_manifest/
 
-# Large geospatial/vector/raster sidecars anywhere else
+# Large source data and generated analysis products
+data/
+outputs/
+results*/
+hamburg/
+hamburg_*/
+docs/literature/
+figures/
+
+# Geospatial/vector/raster artifacts outside the directories above
 *.tif
 *.TIF
 *.tiff
 *.TIFF
 *.gpkg
+*.gpkg-shm
+*.gpkg-wal
+*.geojson
 *.shp
 *.shx
 *.dbf
@@ -44,5 +52,6 @@ docs/literature/
 *.qml
 *.aux.xml
 
-# Local recovery/inventory manifests
-.repo_recovery_manifest/
+# Local top-level exports
+/*.pdf
+/*.zip

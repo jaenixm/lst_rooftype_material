@@ -5,10 +5,9 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
-import numpy as np
 import geopandas as gpd
+import numpy as np
 from rasterstats import zonal_stats
 from rasterio.io import MemoryFile
 from rasterio.mask import mask
@@ -29,10 +28,10 @@ class ScenarioOutputs:
     scenario_raster: Path
     delta_raster: Path
     buildings_layer: Path
-    stats_report: Optional[Path] = None
-    baseline_pred_raster: Optional[Path] = None
-    roof_fraction_raster: Optional[Path] = None
-    feature_importance: Optional[Path] = None
+    stats_report: Path | None = None
+    baseline_pred_raster: Path | None = None
+    roof_fraction_raster: Path | None = None
+    feature_importance: Path | None = None
 
 
 def _load_boundary(boundary_path: Path, target_crs) -> tuple[list[dict], gpd.GeoDataFrame]:
@@ -40,6 +39,9 @@ def _load_boundary(boundary_path: Path, target_crs) -> tuple[list[dict], gpd.Geo
     if boundary.empty:
         raise ValueError(f"Boundary layer {boundary_path} is empty.")
     boundary = boundary[boundary.geometry.notnull()].copy()
+    boundary = boundary[~boundary.geometry.is_empty].copy()
+    if boundary.crs is None:
+        raise ValueError(f"Boundary layer {boundary_path} has no CRS.")
     boundary = boundary.to_crs(target_crs)
     geom = boundary.geometry.unary_union
     if geom.is_empty:
@@ -57,14 +59,29 @@ def _building_extent_boundary(buildings: gpd.GeoDataFrame, target_crs) -> tuple[
     return [mapping(extent)], boundary
 
 
+def _geometry_area_m2(buildings: gpd.GeoDataFrame) -> np.ndarray:
+    """Return geometry areas in square metres, independent of the input CRS."""
+    if buildings.crs is None:
+        raise ValueError(
+            "Building layer has no CRS; square-metre roof areas cannot be calculated."
+        )
+    try:
+        area_crs = buildings.estimate_utm_crs()
+    except (RuntimeError, ValueError):
+        area_crs = None
+    if area_crs is None:
+        area_crs = "EPSG:6933"
+    return buildings.to_crs(area_crs).geometry.area.to_numpy(dtype="float64")
+
+
 def _clip_raster_to_boundary(arr: np.ndarray, profile: dict, geoms: list[dict]) -> tuple[np.ndarray, dict]:
     tmp_profile = profile.copy()
     tmp_profile.setdefault("driver", "GTiff")
-    tmp_profile.update(count=1)
+    tmp_profile.update(count=1, dtype="float32", nodata=np.nan)
     with MemoryFile() as memfile:
         with memfile.open(**tmp_profile) as ds:
-            ds.write(arr, 1)
-            clipped, out_transform = mask(ds, geoms, crop=True)
+            ds.write(arr.astype("float32"), 1)
+            clipped, out_transform = mask(ds, geoms, crop=True, filled=False)
             out_profile = ds.profile.copy()
             out_profile.update(
                 height=clipped.shape[1],
@@ -99,6 +116,8 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         lst, lst_profile = read_raster(lst_path)
 
     template_profile = lst_profile
+    if template_profile.get("crs") is None:
+        raise ValueError(f"Baseline LST raster {lst_path} has no CRS.")
 
     if config.layer:
         buildings = gpd.read_file(config.buildings, layer=config.layer)
@@ -107,8 +126,11 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     if buildings.empty:
         raise ValueError(f"Building layer {config.buildings} is empty.")
     buildings = buildings[buildings.geometry.notnull()].copy()
+    buildings = buildings[~buildings.geometry.is_empty].copy()
     if buildings.empty:
         raise ValueError(f"Building layer {config.buildings} has no valid geometries.")
+    if buildings.crs is None:
+        raise ValueError(f"Building layer {config.buildings} has no CRS.")
     if buildings.crs != template_profile["crs"]:
         buildings = buildings.to_crs(template_profile["crs"])
 
@@ -138,7 +160,8 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         keep_null_roof=config.keep_null_roof,
     )
     if config.min_roof_area > 0:
-        bld_green = bld_green[bld_green.geometry.area >= config.min_roof_area].copy()
+        roof_areas = _geometry_area_m2(bld_green)
+        bld_green = bld_green.loc[roof_areas >= config.min_roof_area].copy()
 
     if bld_green.empty:
         raise ValueError("No buildings match the requested roof types to green.")
@@ -154,6 +177,11 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         if config.build_lst:
             save_raster(lst_path, lst, template_profile)
 
+    valid_lsts = np.isfinite(lst)
+    ndvi = np.where(valid_lsts, ndvi, np.nan).astype("float32")
+    albedo = np.where(valid_lsts, albedo, np.nan).astype("float32")
+    ndbi = np.where(valid_lsts, ndbi, np.nan).astype("float32")
+
     if config.write_indices_rasters:
         save_raster(out_dir / "ndvi.tif", ndvi.astype("float32"), template_profile)
         save_raster(out_dir / "albedo.tif", albedo.astype("float32"), template_profile)
@@ -168,7 +196,12 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     target_albedo = float(config.target_albedo)
     target_ndbi = float(config.target_ndbi)
 
-    pixel_size = abs(template_profile["transform"].a)
+    transform = template_profile["transform"]
+    pixel_size = float(np.sqrt(abs(transform.a * transform.e - transform.b * transform.d)))
+    if pixel_size <= 0:
+        raise ValueError(
+            "The baseline LST raster has an invalid transform with zero pixel area."
+        )
     if config.min_sample_spacing > 0:
         block_size = max(1, int(round(config.min_sample_spacing / pixel_size)))
     else:
@@ -193,19 +226,29 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         metrics["rmse_test"],
     )
     feat_report = out_dir / "model_feature_importance.txt"
-    feature_importance_path: Optional[Path] = None
+    feature_importance_path: Path | None = None
+    report_lines = [
+        f"Model: {config.model}",
+        f"R2 train: {metrics['r2_train']:.6f}",
+        f"R2 test: {metrics['r2_test']:.6f}",
+        f"RMSE train: {metrics['rmse_train']:.6f}",
+        f"RMSE test: {metrics['rmse_test']:.6f}",
+        "",
+    ]
     if hasattr(model, "feature_importances_"):
         vals = model.feature_importances_
         names = ["ndvi", "albedo", "ndbi"]
         lines = [f"{n}: {v:.4f}" for n, v in zip(names, vals)]
-        feat_report.write_text("Random Forest feature importances (sum=1):\n" + "\n".join(lines), encoding="utf-8")
+        report_lines.extend(["Random Forest feature importances (sum=1):", *lines])
+        feat_report.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
         feature_importance_path = feat_report
         logger.info("Feature importances saved to %s", feat_report)
     elif hasattr(model, "coef_"):
         vals = model.coef_
         names = ["ndvi", "albedo", "ndbi"]
         lines = [f"{n}: {v:.4f}" for n, v in zip(names, vals)]
-        feat_report.write_text("Linear model coefficients:\n" + "\n".join(lines), encoding="utf-8")
+        report_lines.extend(["Linear model coefficients:", *lines])
+        feat_report.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
         feature_importance_path = feat_report
         logger.info("Linear coefficients saved to %s", feat_report)
 
@@ -228,8 +271,8 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         save_raster(roof_fraction_raster, roof_frac.astype("float32"), template_profile)
 
     f = np.clip(roof_frac, 0.0, 1.0).astype("float32")
-    valid_lsts = np.isfinite(lst)
-    pred_mask = (f > 0) & valid_lsts
+    valid_inputs = np.isfinite(ndvi) & np.isfinite(albedo) & np.isfinite(ndbi)
+    pred_mask = (f > 0) & valid_lsts & valid_inputs
 
     scen_ndvi = (1.0 - f) * ndvi + f * target_ndvi
     scen_albedo = (1.0 - f) * albedo + f * target_albedo
@@ -237,24 +280,15 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     scen_pred = predict_partial(model, scen_ndvi, scen_albedo, pred_mask, scen_ndbi)
 
-    # 2. Calculate Delta: Scenario Prediction - Baseline Prediction
-    # This isolates the effect of the green roof by canceling out the model's bias.
+    # Subtract the modeled baseline to isolate the intervention and cancel model bias.
     delta = np.zeros(ndvi.shape, dtype="float32")
-    
-    # Ensure we only calculate delta where we have valid predictions AND valid input data
-    mfin = pred_mask & np.isfinite(scen_pred) & np.isfinite(baseline_pred) & valid_lsts
-    
-    # THE FIX: Subtract baseline_pred, NOT lst
+    mfin = pred_mask & np.isfinite(scen_pred) & np.isfinite(baseline_pred)
     delta[mfin] = scen_pred[mfin] - baseline_pred[mfin]
 
     if config.clip_positive_delta:
-        # Optional: keep only cooling effects; warmings are nulled out
         delta[(delta > 0) & np.isfinite(delta)] = 0.0
 
-    # 3. Create the final "Scenario Absolute Temperature" raster
-    # Instead of pasting the raw model prediction (which has bias) into the observed LST,
-    # we apply the clean 'delta' to the observed 'lst'. 
-    # This prevents visual "seams" between changed and unchanged pixels.
+    # Apply only the modeled intervention delta to observed LST to avoid model-bias seams.
     scen_pred_filled = lst.copy()
     scen_pred_filled[mfin] = lst[mfin] + delta[mfin]
 
@@ -268,7 +302,7 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     save_raster(delta_raster, delta, template_profile)
 
     # City-wide raster statistic: mean cooling (baseline LST - scenario LST)
-    stats_report_path: Optional[Path] = None
+    stats_report_path: Path | None = None
     valid_city_mask = np.isfinite(lst) & np.isfinite(scen_pred_filled)
     city_mean_cooling = float("nan")
     if np.any(valid_city_mask):
@@ -305,12 +339,13 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
     buildings["lst_scenario_mean"] = [z["mean"] for z in scenario_stats]
     buildings["delta_mean"] = [z["mean"] for z in delta_stats]
     buildings["cooling_mean"] = buildings["lst_baseline_mean"] - buildings["lst_scenario_mean"]
-    buildings["roof_area_m2"] = buildings.geometry.area.astype("float32")
+    buildings["roof_area_m2"] = _geometry_area_m2(buildings)
+    buildings["selected_for_greening"] = buildings.index.isin(bld_green.index)
 
     cooling_valid = buildings[np.isfinite(buildings["cooling_mean"])].copy()
     cooling_valid = cooling_valid[np.isfinite(cooling_valid["roof_area_m2"])]
 
-    def _aggregate_stats(df: gpd.GeoDataFrame) -> tuple[float, float, float, Optional[str]]:
+    def _aggregate_stats(df: gpd.GeoDataFrame) -> tuple[float, float, float, str | None]:
         if df.empty:
             return float("nan"), float("nan"), float("nan"), None
         avg = float(df["cooling_mean"].mean())
@@ -324,9 +359,8 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     all_avg, all_weighted, all_max, all_max_label = _aggregate_stats(cooling_valid)
 
-    changed_mask = cooling_valid["cooling_mean"] > 0.01
-    changed = cooling_valid.loc[changed_mask].copy()
-    ch_avg, ch_weighted, ch_max, ch_max_label = _aggregate_stats(changed)
+    selected = cooling_valid.loc[cooling_valid["selected_for_greening"]].copy()
+    sel_avg, sel_weighted, sel_max, sel_max_label = _aggregate_stats(selected)
 
     buildings_layer = out_dir / "buildings_greening_impact.gpkg"
     buildings.to_file(buildings_layer, driver="GPKG")
@@ -339,28 +373,30 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         "Greening statistics",
         "-------------------",
         f"Raster mean (baseline - scenario): {_fmt(city_mean_cooling)} °C",
+        f"Buildings in analysis: {len(buildings)}",
+        f"Buildings selected for greening: {len(bld_green)}",
         "All buildings (city-wide dilution/impact):",
         f"  Average cooling: {_fmt(all_avg)} °C",
         f"  Area-weighted average cooling: {_fmt(all_weighted)} °C",
         f"  Max cooling: {_fmt(all_max)} °C" + (f" (id={all_max_label})" if all_max_label else ""),
-        "Greened/changed buildings (cooling_mean > 0.01 °C):",
-        f"  Average cooling: {_fmt(ch_avg)} °C",
-        f"  Area-weighted average cooling: {_fmt(ch_weighted)} °C",
-        f"  Max cooling: {_fmt(ch_max)} °C" + (f" (id={ch_max_label})" if ch_max_label else ""),
+        "Buildings selected for greening (with valid statistics):",
+        f"  Average cooling: {_fmt(sel_avg)} °C",
+        f"  Area-weighted average cooling: {_fmt(sel_weighted)} °C",
+        f"  Max cooling: {_fmt(sel_max)} °C" + (f" (id={sel_max_label})" if sel_max_label else ""),
     ]
     stats_report_path = out_dir / "_greening_statistics.txt"
     stats_report_path.write_text("\n".join(stats_lines), encoding="utf-8")
 
     logger.info(
         "Cooling stats (°C) | Raster mean (baseline - scenario)=%s | Avg all=%s, weighted all=%s, max all=%s | "
-        "Avg changed=%s, weighted changed=%s, max changed=%s",
+        "Avg selected=%s, weighted selected=%s, max selected=%s",
         _fmt(city_mean_cooling),
         _fmt(all_avg),
         _fmt(all_weighted),
         _fmt(all_max),
-        _fmt(ch_avg),
-        _fmt(ch_weighted),
-        _fmt(ch_max),
+        _fmt(sel_avg),
+        _fmt(sel_weighted),
+        _fmt(sel_max),
     )
 
     provenance = (
@@ -368,12 +404,19 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         f"Roof shape field/types: {config.roof_shape_field} / {config.roof_shape_type}\n"
         f"Roof slope field/max deg: {config.roof_slope_field} / {config.max_roof_slope_deg}\n"
         f"Analysis extent: {clip_source}\n"
+        f"Landsat L2 folder: {config.l2_folder}\n"
         f"Target NDVI: {target_ndvi}\n"
         f"Target Albedo: {target_albedo}\n"
+        f"Target NDBI: {target_ndbi}\n"
         f"LST source: {'built from L2 folder' if config.build_lst else lst_path}\n"
         f"Supersample: {config.supersample}\n"
         f"Model type: {config.model}\n"
-        f"Used NDBI predictor: yes\n"
+        f"Sample fraction: {config.sample_frac}\n"
+        f"Minimum sample spacing: {config.min_sample_spacing}\n"
+        f"Random state: {config.random_state}\n"
+        f"R2 train/test: {metrics['r2_train']:.6f} / {metrics['r2_test']:.6f}\n"
+        f"RMSE train/test: {metrics['rmse_train']:.6f} / {metrics['rmse_test']:.6f}\n"
+        f"Buildings analyzed/selected: {len(buildings)} / {len(bld_green)}\n"
     )
     if config.build_lst:
         provenance += f"LST build options: unit={config.lst_unit}, keep_water={config.keep_lst_water}\n"

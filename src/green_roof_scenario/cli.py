@@ -81,7 +81,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--target_ndvi",
         type=float,
         default=0.4,
-        help="Target NDVI for green roofs (default: median of vegetated pixels).",
+        help="Target NDVI for green roofs (default: 0.4).",
     )
     parser.add_argument(
         "--target_albedo",
@@ -117,7 +117,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--supersample",
         type=int,
-        default=8,
+        default=4,
         help="Supersampling factor to estimate roof fraction per pixel (default: 4).",
     )
     parser.add_argument(
@@ -179,40 +179,42 @@ def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
     if has_slope and args.max_roof_slope_deg < 0:
         parser.error("--max_roof_slope_deg must be >= 0.")
 
-    config = ScenarioConfig(
-        l2_folder=args.l2_folder,
-        buildings=args.buildings,
-        roof_material_field=args.roof_material_field,
-        roof_materials_type=args.roof_materials_type,
-        roof_shape_field=args.roof_shape_field,
-        roof_shape_type=args.roof_shape_type,
-        roof_slope_field=args.roof_slope_field,
-        max_roof_slope_deg=args.max_roof_slope_deg,
-        boundary=boundary_path,
-        out_dir=args.out_dir,
-        lst=args.lst,
-        build_lst=args.build_lst,
-        lst_unit=args.lst_unit,
-        keep_lst_water=args.keep_lst_water,
-        layer=args.layer,
-        target_ndvi=args.target_ndvi,
-        target_albedo=args.target_albedo,
-        target_ndbi=args.target_ndbi,
-        sample_frac=args.sample_frac,
-        min_sample_spacing=args.min_sample_spacing,
-        random_state=args.random_state,
-        model=args.model,
-        supersample=args.supersample,
-        all_touched=args.all_touched,
-        write_pred_baseline=args.write_pred_baseline,
-        keep_null_roof=args.keep_null_roof,
-        write_roof_fraction_raster=args.write_roof_fraction_raster,
-        write_indices_rasters=args.write_indices_rasters,
-        log_level=args.log_level,
-        min_roof_area=args.min_roof_area,
-        clip_positive_delta=args.clip_positive_delta,
-    )
-    return config
+    try:
+        return ScenarioConfig(
+            l2_folder=args.l2_folder,
+            buildings=args.buildings,
+            roof_material_field=args.roof_material_field,
+            roof_materials_type=args.roof_materials_type,
+            roof_shape_field=args.roof_shape_field,
+            roof_shape_type=args.roof_shape_type,
+            roof_slope_field=args.roof_slope_field,
+            max_roof_slope_deg=args.max_roof_slope_deg,
+            boundary=boundary_path,
+            out_dir=args.out_dir,
+            lst=args.lst,
+            build_lst=args.build_lst,
+            lst_unit=args.lst_unit,
+            keep_lst_water=args.keep_lst_water,
+            layer=args.layer,
+            target_ndvi=args.target_ndvi,
+            target_albedo=args.target_albedo,
+            target_ndbi=args.target_ndbi,
+            sample_frac=args.sample_frac,
+            min_sample_spacing=args.min_sample_spacing,
+            random_state=args.random_state,
+            model=args.model,
+            supersample=args.supersample,
+            all_touched=args.all_touched,
+            write_pred_baseline=args.write_pred_baseline,
+            keep_null_roof=args.keep_null_roof,
+            write_roof_fraction_raster=args.write_roof_fraction_raster,
+            write_indices_rasters=args.write_indices_rasters,
+            log_level=args.log_level,
+            min_roof_area=args.min_roof_area,
+            clip_positive_delta=args.clip_positive_delta,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
 
 
 def main(argv: Sequence[str] | None = None) -> None:

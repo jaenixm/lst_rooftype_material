@@ -5,11 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional, Tuple
 
-import glob
-
 import numpy as np
 import rasterio
 from rasterio.enums import Resampling
+from rasterio.warp import reproject
 
 SR_SCALE = 0.0000275
 SR_OFFSET = -0.2
@@ -47,12 +46,11 @@ def _build_clear_mask(qa: np.ndarray, keep_water: bool = False) -> np.ndarray:
 
 def _find_band(folder: Path | str, suffix: str) -> Optional[str]:
     folder = Path(folder)
-    pats = [folder / f"*{suffix}.TIF", folder / f"*{suffix}.tif"]
-    for pat in pats:
-        matches = glob.glob(str(pat))
-        if matches:
-            return matches[0]
-    return None
+    matches = sorted({*folder.glob(f"*{suffix}.TIF"), *folder.glob(f"*{suffix}.tif")})
+    if len(matches) > 1:
+        names = ", ".join(path.name for path in matches)
+        raise ValueError(f"Multiple Landsat bands match '*{suffix}': {names}")
+    return str(matches[0]) if matches else None
 
 
 def build_lst_from_l2(
@@ -62,6 +60,8 @@ def build_lst_from_l2(
     unit: str = "celsius",
     keep_water: bool = False,
 ) -> Tuple[Path, np.ndarray, dict]:
+    if unit not in {"celsius", "kelvin"}:
+        raise ValueError("unit must be 'celsius' or 'kelvin'.")
     st_path = _find_band(l2_folder, "_ST_B10")
     qa_path = _find_band(l2_folder, "_QA_PIXEL")
     if not st_path:
@@ -80,6 +80,15 @@ def build_lst_from_l2(
     st_kelvin = st_raw.astype("float32") * ST_SCALE + ST_OFFSET
 
     with rasterio.open(qa_path) as src_qa:
+        if (
+            src_qa.crs != profile["crs"]
+            or src_qa.transform != profile["transform"]
+            or src_qa.width != profile["width"]
+            or src_qa.height != profile["height"]
+        ):
+            raise ValueError(
+                "QA_PIXEL and ST_B10 must use the same CRS, transform, width, and height."
+            )
         qa = src_qa.read(1)
 
     clear = _build_clear_mask(qa, keep_water=keep_water)
@@ -119,10 +128,25 @@ def build_lst_from_l2(
     return out_path, out_arr, profile
 
 
-def _read_rescaled_to_template(path: str, shape: tuple[int, int]) -> np.ndarray:
+def _read_rescaled_to_template(path: str, template_profile: dict) -> np.ndarray:
+    shape = (template_profile["height"], template_profile["width"])
+    destination = np.full(shape, np.nan, dtype="float32")
     with rasterio.open(path) as src:
-        arr = src.read(1, out_shape=shape, resampling=Resampling.bilinear)
-    return arr.astype("float32") * SR_SCALE + SR_OFFSET
+        if src.crs is None or template_profile.get("crs") is None:
+            raise ValueError("Source bands and the template raster must have a CRS.")
+        source = src.read(1, masked=True).astype("float32").filled(np.nan)
+        reproject(
+            source=source,
+            destination=destination,
+            src_transform=src.transform,
+            src_crs=src.crs,
+            src_nodata=np.nan,
+            dst_transform=template_profile["transform"],
+            dst_crs=template_profile["crs"],
+            dst_nodata=np.nan,
+            resampling=Resampling.bilinear,
+        )
+    return destination * SR_SCALE + SR_OFFSET
 
 
 def _load_l2_bands_to_template(l2_folder: Path | str, template_path: Path | str):
@@ -137,13 +161,13 @@ def _load_l2_bands_to_template(l2_folder: Path | str, template_path: Path | str)
 
     with rasterio.open(template_path) as tmp:
         profile = tmp.profile.copy()
-        shape = (tmp.height, tmp.width)
+        profile.update(width=tmp.width, height=tmp.height, transform=tmp.transform, crs=tmp.crs)
 
-    blue = _read_rescaled_to_template(b2, shape)
-    red = _read_rescaled_to_template(b4, shape)
-    nir = _read_rescaled_to_template(b5, shape)
-    swir1 = _read_rescaled_to_template(b6, shape)
-    swir2 = _read_rescaled_to_template(b7, shape)
+    blue = _read_rescaled_to_template(b2, profile)
+    red = _read_rescaled_to_template(b4, profile)
+    nir = _read_rescaled_to_template(b5, profile)
+    swir1 = _read_rescaled_to_template(b6, profile)
+    swir2 = _read_rescaled_to_template(b7, profile)
 
     return blue, red, nir, swir1, swir2, profile
 
@@ -178,4 +202,3 @@ def compute_ndvi_albedo_from_l2(l2_folder: Path | str, template_path: Path | str
     blue, red, nir, swir1, swir2, profile = _load_l2_bands_to_template(l2_folder, template_path)
     ndvi, albedo, ndbi = _compute_indices(blue, red, nir, swir1, swir2)
     return ndvi, albedo, ndbi, profile
-

@@ -17,6 +17,15 @@ __all__ = [
 ]
 
 
+def _validate_same_shape(**arrays: np.ndarray) -> tuple[int, ...]:
+    shapes = {name: arr.shape for name, arr in arrays.items()}
+    unique_shapes = set(shapes.values())
+    if len(unique_shapes) != 1:
+        details = ", ".join(f"{name}={shape}" for name, shape in shapes.items())
+        raise ValueError(f"All model arrays must have the same shape; got {details}.")
+    return next(iter(unique_shapes))
+
+
 def sample_model_inputs(
     lst: np.ndarray,
     ndvi: np.ndarray,
@@ -26,6 +35,9 @@ def sample_model_inputs(
     seed: int,
     block_size: int | None = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    _validate_same_shape(lst=lst, ndvi=ndvi, albedo=albedo, ndbi=ndbi)
+    if not 0 < frac <= 1:
+        raise ValueError("frac must be greater than 0 and at most 1.")
     mask = np.isfinite(lst) & np.isfinite(ndvi) & np.isfinite(albedo) & np.isfinite(ndbi)
 
     if block_size is None or block_size <= 1:
@@ -77,7 +89,13 @@ def fit_model(
     model_type: str = "linear",
     block_size: int | None = None,
 ):
+    if model_type not in {"linear", "rf"}:
+        raise ValueError("model_type must be 'linear' or 'rf'.")
     X, y = sample_model_inputs(lst, ndvi, albedo, ndbi, frac, seed, block_size=block_size)
+    if len(y) < 6:
+        raise ValueError(
+            "At least six valid training pixels are required to fit and evaluate a model."
+        )
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=seed)
 
     if model_type == "linear":
@@ -107,6 +125,7 @@ def fit_model(
 
 
 def predict_model(model, ndvi: np.ndarray, albedo: np.ndarray, ndbi: np.ndarray) -> np.ndarray:
+    _validate_same_shape(ndvi=ndvi, albedo=albedo, ndbi=ndbi)
     mask = np.isfinite(ndvi) & np.isfinite(albedo) & np.isfinite(ndbi)
     out = np.full(ndvi.shape, np.nan, dtype="float32")
     if mask.sum() == 0:
@@ -124,8 +143,10 @@ def predict_partial(
     mask: np.ndarray,
     ndbi: np.ndarray,
 ) -> np.ndarray:
+    _validate_same_shape(ndvi=ndvi, albedo=albedo, ndbi=ndbi, mask=mask)
     out = np.full(ndvi.shape, np.nan, dtype="float32")
-    idx = np.flatnonzero(mask)
+    finite_mask = mask & np.isfinite(ndvi) & np.isfinite(albedo) & np.isfinite(ndbi)
+    idx = np.flatnonzero(finite_mask)
     if idx.size == 0:
         return out
     X = np.column_stack([ndvi.ravel()[idx], albedo.ravel()[idx], ndbi.ravel()[idx]])
