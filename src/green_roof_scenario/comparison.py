@@ -162,13 +162,27 @@ def _validate_delta(path: Path) -> float:
     return maximum
 
 
-def _validate_diagnostics(records: list[dict[str, object]]) -> None:
+DIAGNOSTIC_ABS_TOLERANCE = 1e-12
+
+
+def _validate_diagnostics(records: list[dict[str, object]]) -> float:
+    maximum_difference = 0.0
     for city in CITY_PARAMETERS:
         city_records = [record for record in records if record["case"]["city"] == city]
         reference = city_records[0]["provenance"]["model_diagnostics"]
         for record in city_records[1:]:
-            if record["provenance"]["model_diagnostics"] != reference:
-                raise AssertionError(f"Model diagnostics differ within {city}")
+            candidate = record["provenance"]["model_diagnostics"]
+            if candidate.keys() != reference.keys():
+                raise AssertionError(f"Model diagnostic fields differ within {city}")
+            for key in reference:
+                difference = abs(float(candidate[key]) - float(reference[key]))
+                maximum_difference = max(maximum_difference, difference)
+                if difference > DIAGNOSTIC_ABS_TOLERANCE:
+                    raise AssertionError(
+                        f"Model diagnostic {key} differs within {city} by {difference}, "
+                        f"exceeding {DIAGNOSTIC_ABS_TOLERANCE}"
+                    )
+    return maximum_difference
 
 
 def _validate_historical(records: list[dict[str, object]], historical_output: Path) -> None:
@@ -198,7 +212,7 @@ def _fmt(value: float, digits: int = 4) -> str:
     return f"{value:.{digits}f}"
 
 
-def write_summary(records: list[dict[str, object]], summary_path: Path, manifest_path: Path, data_root: Path, prepared_dir: Path, output_root: Path) -> None:
+def write_summary(records: list[dict[str, object]], summary_path: Path, manifest_path: Path, data_root: Path, prepared_dir: Path, output_root: Path, diagnostic_max_difference: float) -> None:
     lines = [
         "# Legacy exact-versus-dominant material comparison",
         "",
@@ -271,7 +285,7 @@ def write_summary(records: list[dict[str, object]], summary_path: Path, manifest
         "",
         "## Model diagnostics",
         "",
-        "Diagnostics are identical across all scenarios within each city, as required.",
+        f"Diagnostics are identical to numerical precision across scenarios within each city (maximum absolute difference `{diagnostic_max_difference:.3e}`, required ≤ `{DIAGNOSTIC_ABS_TOLERANCE:.0e}`). Rounded diagnostics and feature-importance files are identical.",
         "",
         "| City | R² train | R² test | RMSE train (°C) | RMSE test (°C) |",
         "|---|---:|---:|---:|---:|",
@@ -299,9 +313,45 @@ def write_summary(records: list[dict[str, object]], summary_path: Path, manifest
     summary_path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def run_comparison(data_root: Path, prepared_dir: Path, output_root: Path, historical_output: Path, summary_path: Path, manifest_path: Path) -> None:
-    if output_root.exists() and any(output_root.iterdir()):
+def _validate_case_provenance(case: ComparisonCase, provenance: dict[str, object], data_root: Path, prepared_dir: Path) -> None:
+    parameters = provenance["parameters"]
+    expected = {
+        "roof_material_field": "predicted_roof_materials",
+        "roof_materials_type": "0,4",
+        "roof_material_strategy": case.strategy,
+        "roof_material_cov_field": "material_cov",
+        "roof_slope_field": case.slope_field,
+        "max_roof_slope_deg": case.threshold,
+        "model": "rf",
+        "sample_frac": 0.1,
+        "min_sample_spacing": 100,
+        "random_state": 42,
+        "supersample": 8,
+        "clip_positive_delta": True,
+        "write_indices_rasters": True,
+        "write_pred_baseline": False,
+    }
+    for key, expected_value in expected.items():
+        if parameters.get(key) != expected_value:
+            raise AssertionError(
+                f"{case.name}: provenance parameter {key}={parameters.get(key)!r}, "
+                f"expected {expected_value!r}"
+            )
+    expected_buildings = (prepared_dir / case.buildings_file).resolve()
+    expected_l2 = (data_root / case.l2_folder).resolve()
+    if Path(provenance["inputs"]["buildings"]["path"]) != expected_buildings:
+        raise AssertionError(f"{case.name}: provenance buildings path differs")
+    if Path(provenance["inputs"]["landsat_l2_folder"]["path"]) != expected_l2:
+        raise AssertionError(f"{case.name}: provenance Landsat path differs")
+
+
+def run_comparison(data_root: Path, prepared_dir: Path, output_root: Path, historical_output: Path, summary_path: Path, manifest_path: Path, *, reuse_existing: bool = False) -> None:
+    if output_root.exists() and any(output_root.iterdir()) and not reuse_existing:
         raise FileExistsError(f"Refusing to overwrite non-empty scenario directory: {output_root}")
+    if reuse_existing and not output_root.is_dir():
+        raise FileNotFoundError(f"Existing scenario directory missing: {output_root}")
+    if summary_path.exists() or manifest_path.exists():
+        raise FileExistsError("Refusing to overwrite an existing summary or manifest")
     output_root.mkdir(parents=True, exist_ok=True)
     prep_manifest_path = prepared_dir / "preparation_manifest.json"
     if not prep_manifest_path.exists():
@@ -309,7 +359,8 @@ def run_comparison(data_root: Path, prepared_dir: Path, output_root: Path, histo
 
     records: list[dict[str, object]] = []
     for number, case in enumerate(CASES, start=1):
-        print(f"[{number:02d}/{len(CASES):02d}] running {case.name}", flush=True)
+        action = "revalidating" if reuse_existing else "running"
+        print(f"[{number:02d}/{len(CASES):02d}] {action} {case.name}", flush=True)
         source_count, source_area_m2 = _source_candidate_stats(case, prepared_dir)
         source_area_ha = source_area_m2 / 10000
         if source_count != case.expected_count:
@@ -319,27 +370,55 @@ def run_comparison(data_root: Path, prepared_dir: Path, output_root: Path, histo
                 f"{case.name}: source selected area {source_area_ha:.6f} ha, "
                 f"expected {case.expected_area_ha:.4f} ha"
             )
-        output = run_scenario(_scenario_config(case, data_root, prepared_dir, output_root))
-        provenance = json.loads(Path(output.provenance).read_text())
+        if reuse_existing:
+            case_output_dir = output_root / case.name
+            required = [
+                "_greening_provenance.json",
+                "_greening_statistics.txt",
+                "buildings_greening_impact.gpkg",
+                "delta_LST.tif",
+                "model_feature_importance.txt",
+                "scenario_pred_LST.tif",
+            ]
+            missing = [name for name in required if not (case_output_dir / name).is_file()]
+            if missing:
+                raise FileNotFoundError(f"{case.name}: existing output is incomplete: {missing}")
+            provenance_path = case_output_dir / "_greening_provenance.json"
+            delta_raster = case_output_dir / "delta_LST.tif"
+        else:
+            output = run_scenario(_scenario_config(case, data_root, prepared_dir, output_root))
+            case_output_dir = output.out_dir
+            provenance_path = Path(output.provenance)
+            delta_raster = output.delta_raster
+        provenance = json.loads(provenance_path.read_text())
+        _validate_case_provenance(case, provenance, data_root, prepared_dir)
         count = int(provenance["counts"]["buildings_selected"])
         if count != case.expected_count:
             raise AssertionError(f"{case.name}: selected {count}, expected {case.expected_count}")
-        max_delta = _validate_delta(output.delta_raster)
+        max_delta = _validate_delta(delta_raster)
         records.append(
             {
                 "case": vars(case),
-                "output_dir": str(output.out_dir.resolve()),
+                "output_dir": str(case_output_dir.resolve()),
                 "candidate_area_source_crs_m2": source_area_m2,
                 "maximum_delta_c": max_delta,
                 "provenance": provenance,
-                "output_files": _output_hashes(output.out_dir),
+                "output_files": _output_hashes(case_output_dir),
             }
         )
         print(f"[{number:02d}/{len(CASES):02d}] validated {case.name}: {count:,} candidates", flush=True)
 
-    _validate_diagnostics(records)
+    diagnostic_max_difference = _validate_diagnostics(records)
     _validate_historical(records, historical_output)
-    write_summary(records, summary_path, manifest_path, data_root, prepared_dir, output_root)
+    write_summary(
+        records,
+        summary_path,
+        manifest_path,
+        data_root,
+        prepared_dir,
+        output_root,
+        diagnostic_max_difference,
+    )
     manifest = {
         "schema_version": 1,
         "git_commit": git_commit(),
@@ -349,7 +428,11 @@ def run_comparison(data_root: Path, prepared_dir: Path, output_root: Path, histo
         "validations": {
             "expected_counts_and_areas": "passed",
             "all_deltas_non_positive": "passed",
-            "model_diagnostics_identical_within_city": "passed",
+            "model_diagnostics_identical_within_city": {
+                "status": "passed",
+                "absolute_tolerance": DIAGNOSTIC_ABS_TOLERANCE,
+                "maximum_absolute_difference": diagnostic_max_difference,
+            },
             "hamburg_old_historical_reproduction": "passed",
         },
         "runs": records,
@@ -368,6 +451,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--historical-output", type=Path, required=True)
     parser.add_argument("--summary-path", type=Path, required=True)
     parser.add_argument("--manifest-path", type=Path, required=True)
+    parser.add_argument(
+        "--reuse-existing",
+        action="store_true",
+        help="Read-only revalidation/finalization of a complete existing 12-run output root.",
+    )
     return parser
 
 
@@ -380,6 +468,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         historical_output=args.historical_output.resolve(),
         summary_path=args.summary_path.resolve(),
         manifest_path=args.manifest_path.resolve(),
+        reuse_existing=args.reuse_existing,
     )
 
 

@@ -9,6 +9,7 @@ import numpy as np
 from shapely.geometry import Point
 
 from green_roof_scenario.cli import parse_args
+from green_roof_scenario.comparison import _validate_diagnostics
 from green_roof_scenario.masking import parse_array_value, select_material_value, subset_buildings
 
 
@@ -106,6 +107,30 @@ class CliTests(unittest.TestCase):
             ["--l2_folder", "scene", "--buildings", "buildings.gpkg", "--roof_materials_type", "0"]
         )
         self.assertEqual(config.roof_material_strategy, "legacy")
+
+
+class ComparisonValidationTests(unittest.TestCase):
+    @staticmethod
+    def records(difference):
+        records = []
+        for city in ("madrid", "paris", "hamburg"):
+            records.extend(
+                [
+                    {"case": {"city": city}, "provenance": {"model_diagnostics": {"rmse": 2.0}}},
+                    {
+                        "case": {"city": city},
+                        "provenance": {"model_diagnostics": {"rmse": 2.0 + difference}},
+                    },
+                ]
+            )
+        return records
+
+    def test_diagnostics_accept_machine_precision_noise(self):
+        self.assertLessEqual(_validate_diagnostics(self.records(1e-15)), 1e-12)
+
+    def test_diagnostics_reject_material_difference(self):
+        with self.assertRaises(AssertionError):
+            _validate_diagnostics(self.records(1e-9))
 
 
 if __name__ == "__main__":
