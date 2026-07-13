@@ -8,10 +8,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+import geopandas as gpd
 import numpy as np
 import rasterio
 
 from .config import ScenarioConfig
+from .masking import subset_buildings
 from .provenance import git_commit, sha256_path
 from .scenario import run_scenario
 
@@ -135,6 +137,22 @@ def _output_hashes(output_dir: Path) -> dict[str, dict[str, object]]:
     }
 
 
+def _source_candidate_stats(case: ComparisonCase, prepared_dir: Path) -> tuple[int, float]:
+    """Measure candidates in the prepared layer's own projected CRS."""
+
+    buildings = gpd.read_file(prepared_dir / case.buildings_file, layer="buildings")
+    selected = subset_buildings(
+        buildings,
+        "predicted_roof_materials",
+        "0,4",
+        roof_slope_field=case.slope_field,
+        max_roof_slope_deg=case.threshold,
+        roof_material_strategy=case.strategy,
+        roof_material_cov_field="material_cov",
+    )
+    return len(selected), float(selected.geometry.area.sum())
+
+
 def _validate_delta(path: Path) -> float:
     with rasterio.open(path) as src:
         delta = src.read(1, masked=True)
@@ -213,7 +231,7 @@ def write_summary(records: list[dict[str, object]], summary_path: Path, manifest
         by_name[str(case["name"])] = record
         lines.append(
             f"| {case['dataset']} | ≤{int(case['threshold'])}° | {case['strategy']} | "
-            f"{counts['buildings_selected']:,} | {_fmt(counts['selected_roof_area_m2'] / 10000)} | "
+            f"{counts['buildings_selected']:,} | {_fmt(record['candidate_area_source_crs_m2'] / 10000)} | "
             f"{counts['buildings_cooling_gt_0_01_c']:,} | {_fmt(stats['raster_mean'])} | "
             f"{_fmt(stats['all_buildings_average'])} | {_fmt(stats['all_buildings_area_weighted_average'])} | "
             f"{_fmt(stats['changed_buildings_average'])} | {_fmt(stats['changed_buildings_area_weighted_average'])} | "
@@ -229,13 +247,19 @@ def write_summary(records: list[dict[str, object]], summary_path: Path, manifest
     ])
     pairs = [("madrid", 11), ("madrid", 30), ("paris", 11), ("paris", 30), ("hamburg_old", 15), ("hamburg_new", 15)]
     for dataset, threshold in pairs:
-        exact = by_name[f"{dataset}_exact_le{threshold}"]["provenance"]
-        dominant = by_name[f"{dataset}_dominant_le{threshold}"]["provenance"]
+        exact_record = by_name[f"{dataset}_exact_le{threshold}"]
+        dominant_record = by_name[f"{dataset}_dominant_le{threshold}"]
+        exact = exact_record["provenance"]
+        dominant = dominant_record["provenance"]
         ec, dc = exact["counts"], dominant["counts"]
         es, ds = exact["cooling_statistics_c"], dominant["cooling_statistics_c"]
+        area_delta_ha = (
+            dominant_record["candidate_area_source_crs_m2"]
+            - exact_record["candidate_area_source_crs_m2"]
+        ) / 10000
         lines.append(
             f"| {dataset} | ≤{threshold}° | {dc['buildings_selected'] - ec['buildings_selected']:+,} | "
-            f"{_fmt((dc['selected_roof_area_m2'] - ec['selected_roof_area_m2']) / 10000)} | "
+            f"{_fmt(area_delta_ha)} | "
             f"{dc['buildings_cooling_gt_0_01_c'] - ec['buildings_cooling_gt_0_01_c']:+,} | "
             f"{_fmt(ds['raster_mean'] - es['raster_mean'])} | "
             f"{_fmt(ds['changed_buildings_average'] - es['changed_buildings_average'])} | "
@@ -286,19 +310,26 @@ def run_comparison(data_root: Path, prepared_dir: Path, output_root: Path, histo
     records: list[dict[str, object]] = []
     for number, case in enumerate(CASES, start=1):
         print(f"[{number:02d}/{len(CASES):02d}] running {case.name}", flush=True)
+        source_count, source_area_m2 = _source_candidate_stats(case, prepared_dir)
+        source_area_ha = source_area_m2 / 10000
+        if source_count != case.expected_count:
+            raise AssertionError(f"{case.name}: source selected {source_count}, expected {case.expected_count}")
+        if abs(source_area_ha - case.expected_area_ha) > 0.00015:
+            raise AssertionError(
+                f"{case.name}: source selected area {source_area_ha:.6f} ha, "
+                f"expected {case.expected_area_ha:.4f} ha"
+            )
         output = run_scenario(_scenario_config(case, data_root, prepared_dir, output_root))
         provenance = json.loads(Path(output.provenance).read_text())
         count = int(provenance["counts"]["buildings_selected"])
-        area_ha = float(provenance["counts"]["selected_roof_area_m2"]) / 10000
         if count != case.expected_count:
             raise AssertionError(f"{case.name}: selected {count}, expected {case.expected_count}")
-        if abs(area_ha - case.expected_area_ha) > 0.00015:
-            raise AssertionError(f"{case.name}: selected area {area_ha:.6f} ha, expected {case.expected_area_ha:.4f} ha")
         max_delta = _validate_delta(output.delta_raster)
         records.append(
             {
                 "case": vars(case),
                 "output_dir": str(output.out_dir.resolve()),
+                "candidate_area_source_crs_m2": source_area_m2,
                 "maximum_delta_c": max_delta,
                 "provenance": provenance,
                 "output_files": _output_hashes(output.out_dir),
