@@ -1,0 +1,2064 @@
+{
+  "git_commit": "ea7ce4b7984996bcea2f7baaccda155a900d9434",
+  "preparation": {
+    "datasets": [
+      {
+        "crs": "EPSG:25830",
+        "dataset": "madrid",
+        "feature_count": 121006,
+        "material_validation": {
+          "multi_records": 917,
+          "records": 121006,
+          "scalar_records": 120089,
+          "ties": 0
+        },
+        "output": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/madrid_comparison.gpkg",
+        "output_hash": {
+          "kind": "file",
+          "sha256": "7e421538577c63c8930414dbaa9cebd867da928a2010d221b0c5b3957f17f13f",
+          "size_bytes": 43905024
+        },
+        "sources": {
+          "materials": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/madrid-cls-finale.gpkg",
+            "sha256": "bfae5925b037e49f85d62a771081b64fee0e1ca8019dadb86386f5536454cdd6",
+            "size_bytes": 42569728
+          },
+          "slopes": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/madrid-cls-finale_with_slope_dominant.gpkg",
+            "sha256": "e5f471ed4bd4fdbcfb8be0b6b6ceefb6cd21a9b94e3923e50fa2706bb1c0cb61",
+            "size_bytes": 50810880
+          }
+        }
+      },
+      {
+        "crs": "EPSG:2154",
+        "dataset": "paris",
+        "feature_count": 106391,
+        "material_validation": {
+          "multi_records": 343,
+          "records": 106391,
+          "scalar_records": 106048,
+          "ties": 0
+        },
+        "output": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/paris_comparison.gpkg",
+        "output_hash": {
+          "kind": "file",
+          "sha256": "8ee65899aee479b66e472009c403621c2fe17a58150e88889f37ad0576a5b26c",
+          "size_bytes": 46993408
+        },
+        "sources": {
+          "materials": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/paris-cls-finale-finetuned.gpkg",
+            "sha256": "d0d3f0a461583611c201704f498fdb619259654b582d4e03bbc178c337323851",
+            "size_bytes": 46047232
+          },
+          "slopes": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/paris-cls-finale-finetuned_with_slope_dominant.gpkg",
+            "sha256": "12375562dcce82c7156f303638d61ececf66a5067ff2bd50e7ea992ab72abb34",
+            "size_bytes": 53428224
+          }
+        }
+      },
+      {
+        "crs": "EPSG:25832",
+        "dataset": "hamburg_old",
+        "feature_count": 194799,
+        "material_validation": {
+          "multi_records": 570,
+          "records": 194799,
+          "scalar_records": 194229,
+          "ties": 0
+        },
+        "output": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/hamburg_old_comparison.gpkg",
+        "output_hash": {
+          "kind": "file",
+          "sha256": "9ed9af6e8e9387afdb9501423aa33cfe02a57c9088497bd03399e02e3b6f1bb8",
+          "size_bytes": 70078464
+        },
+        "sources": {
+          "materials": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/processed/buildings/hamburg-cls-finale.geojson",
+            "sha256": "e5dcf173b58cd1f15e90131035ee05e277d8a516b8857b9f53643bcacaf91874",
+            "size_bytes": 294287090
+          },
+          "slopes": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/hamburg-cls-finale-with-slopes_dominant.gpkg",
+            "sha256": "4adc7e1d17d92e0853019a556fa5a9976f6bfcf0e71baeed103d263175728dcf",
+            "size_bytes": 75202560
+          }
+        }
+      },
+      {
+        "crs": "EPSG:25832",
+        "dataset": "hamburg_new",
+        "feature_count": 194799,
+        "material_validation": {
+          "multi_records": 569,
+          "records": 194799,
+          "scalar_records": 194230,
+          "ties": 0
+        },
+        "output": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/hamburg_new_comparison.gpkg",
+        "output_hash": {
+          "kind": "file",
+          "sha256": "3319aa818b530def20bf2aab740a1e354a1ebd075b632e72172b31a53eebdba8",
+          "size_bytes": 70078464
+        },
+        "sources": {
+          "materials": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/Hamburg-cls-with-probs.geojson",
+            "sha256": "d1ea4f63ab696487fa043820377383ce3c72840a02ffb3aa506a47ce9e1ac11a",
+            "size_bytes": 294287066
+          },
+          "slopes": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/hamburg-cls-finale-with-slopes_dominant.gpkg",
+            "sha256": "4adc7e1d17d92e0853019a556fa5a9976f6bfcf0e71baeed103d263175728dcf",
+            "size_bytes": 75202560
+          }
+        }
+      }
+    ],
+    "schema_version": 1
+  },
+  "preparation_manifest_hash": {
+    "kind": "file",
+    "sha256": "96a1256f43cf246fe79ed149d93aed3c9d81ea319a55007f50b6684fd9262d21",
+    "size_bytes": 4837
+  },
+  "runs": [
+    {
+      "candidate_area_source_crs_m2": 5422788.150013769,
+      "case": {
+        "buildings_file": "madrid_comparison.gpkg",
+        "city": "madrid",
+        "dataset": "madrid",
+        "expected_area_ha": 542.2788,
+        "expected_count": 4647,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+        "name": "madrid_exact_le11",
+        "slope_field": "slope_median_deg",
+        "strategy": "exact",
+        "target_albedo": 0.17372641559623933,
+        "target_ndbi": -0.07992667124082531,
+        "target_ndvi": 0.28431087365675817,
+        "threshold": 11.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/madrid_exact_le11",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "e1a46b0c1c3a55ac6b7072c273766ee0f19e921ffca03e6deec01c130827ff67",
+          "size_bytes": 2740
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "05fa36562adf3fa86bbddba2008eb0d3f0c241bbcc32c45728f7e26b18f30373",
+          "size_bytes": 486
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "28a4208e39050cfbd0c3bc1f4ecc991f63a911957495cde49c12524b60c7353d",
+          "size_bytes": 405
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "254ad10d92011d27ba77e65f4bbd7c044f466860fcd91fad48fc33cdb5b301f0",
+          "size_bytes": 3146385
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "6ed146ee14d4c42186a456083002246aabf8156fb5d63a1cc3790380097930d9",
+          "size_bytes": 3146385
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "a29a4e3f39438306417b76bba34ab45a2da55c50858b93ac84dffab68ecaaabb",
+          "size_bytes": 48197632
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "3cd53fb4e0102717c786aeab8837d4a81f42285e92f045feaf1d917fac46c3b0",
+          "size_bytes": 3146385
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "a8883b01f537e28dd066b77515251c364453ee3d83f105fa85433998778191aa",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "ebbed0ddb6231e3d08acfff49d2073005f3b2038dd63776f9bc759dd75ae3e16",
+          "size_bytes": 3146385
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e3d5b019c3c4399bc1447186d0aca61ec0c20160a67cc2ed7cc8ad93c81672be",
+          "size_bytes": 3146385
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "6f82ab0a5df4ed61afdaf9eeaf41c0290094f82bef61af9de5cbd043060d597b",
+          "size_bytes": 3146385
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.1687078246589673,
+          "all_buildings_average": 0.06323150083796768,
+          "all_buildings_maximum": 5.437744140625,
+          "changed_buildings_area_weighted_average": 0.8718918284272388,
+          "changed_buildings_average": 0.6098117574834373,
+          "changed_buildings_maximum": 5.437744140625,
+          "raster_mean": 0.0387372225522995
+        },
+        "counts": {
+          "buildings_analyzed": 121006,
+          "buildings_cooling_gt_0_01_c": 12537,
+          "buildings_selected": 4647,
+          "buildings_with_valid_cooling": 120936,
+          "selected_roof_area_m2": 5422788.150043251
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/madrid_comparison.gpkg",
+            "sha256": "7e421538577c63c8930414dbaa9cebd867da928a2010d221b0c5b3957f17f13f",
+            "size_bytes": 43905024
+          },
+          "landsat_l2_folder": {
+            "file_count": 27,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+            "sha256": "6806febd35989e1810b3e2e1a59693bce54934302bf3e4cdf0a0e7958c5ee401",
+            "size_bytes": 1013523526
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6055409207423426,
+          "r2_train": 0.7273046968297051,
+          "rmse_test": 2.3748752938366597,
+          "rmse_train": 1.9598544904120825
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 11.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "exact",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.17372641559623933,
+          "target_ndbi": -0.07992667124082531,
+          "target_ndvi": 0.28431087365675817,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 6992550.70355021,
+      "case": {
+        "buildings_file": "madrid_comparison.gpkg",
+        "city": "madrid",
+        "dataset": "madrid",
+        "expected_area_ha": 699.2551,
+        "expected_count": 4895,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+        "name": "madrid_dominant_le11",
+        "slope_field": "slope_median_deg",
+        "strategy": "dominant",
+        "target_albedo": 0.17372641559623933,
+        "target_ndbi": -0.07992667124082531,
+        "target_ndvi": 0.28431087365675817,
+        "threshold": 11.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/madrid_dominant_le11",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "34925ae0784374baeced5c306650869bb575d00b61aae0159a577d63c8e9ab47",
+          "size_bytes": 2743
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "a57bde9624c2e55407610161dbd012b6b62709bbcdd32199f1f78a843ce00bda",
+          "size_bytes": 489
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "d7265ce3228297f5d954be0e123996b559aeb7c1f3bddaf714d4f5db50aa9164",
+          "size_bytes": 405
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "254ad10d92011d27ba77e65f4bbd7c044f466860fcd91fad48fc33cdb5b301f0",
+          "size_bytes": 3146385
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "6ed146ee14d4c42186a456083002246aabf8156fb5d63a1cc3790380097930d9",
+          "size_bytes": 3146385
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "f54fcf6cc1bac5ff4a24a6bc4f90b02065cfaecf3f8e0ec07aac4fcddc9a4775",
+          "size_bytes": 48209920
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "4839adb5f4d8d28e68789e6f545af37d2226237249cb4706ad7fe9defeeecd06",
+          "size_bytes": 3146385
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "a8883b01f537e28dd066b77515251c364453ee3d83f105fa85433998778191aa",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "ebbed0ddb6231e3d08acfff49d2073005f3b2038dd63776f9bc759dd75ae3e16",
+          "size_bytes": 3146385
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e3d5b019c3c4399bc1447186d0aca61ec0c20160a67cc2ed7cc8ad93c81672be",
+          "size_bytes": 3146385
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "47b827634ced0bc4865891c886fd4b663f826024a52728c8082c1348f07fc776",
+          "size_bytes": 3146385
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.2283424119036866,
+          "all_buildings_average": 0.06818422763708268,
+          "all_buildings_maximum": 5.437744140625,
+          "changed_buildings_area_weighted_average": 1.038290073948218,
+          "changed_buildings_average": 0.6378942709272234,
+          "changed_buildings_maximum": 5.437744140625,
+          "raster_mean": 0.05106227099895477
+        },
+        "counts": {
+          "buildings_analyzed": 121006,
+          "buildings_cooling_gt_0_01_c": 12924,
+          "buildings_selected": 4895,
+          "buildings_with_valid_cooling": 120936,
+          "selected_roof_area_m2": 6992550.703587992
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/madrid_comparison.gpkg",
+            "sha256": "7e421538577c63c8930414dbaa9cebd867da928a2010d221b0c5b3957f17f13f",
+            "size_bytes": 43905024
+          },
+          "landsat_l2_folder": {
+            "file_count": 27,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+            "sha256": "6806febd35989e1810b3e2e1a59693bce54934302bf3e4cdf0a0e7958c5ee401",
+            "size_bytes": 1013523526
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6055409207423428,
+          "r2_train": 0.7273046968297052,
+          "rmse_test": 2.3748752938366593,
+          "rmse_train": 1.9598544904120827
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 11.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "dominant",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.17372641559623933,
+          "target_ndbi": -0.07992667124082531,
+          "target_ndvi": 0.28431087365675817,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 16888891.56859822,
+      "case": {
+        "buildings_file": "madrid_comparison.gpkg",
+        "city": "madrid",
+        "dataset": "madrid",
+        "expected_area_ha": 1688.8892,
+        "expected_count": 25040,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+        "name": "madrid_exact_le30",
+        "slope_field": "slope_median_deg",
+        "strategy": "exact",
+        "target_albedo": 0.17372641559623933,
+        "target_ndbi": -0.07992667124082531,
+        "target_ndvi": 0.28431087365675817,
+        "threshold": 30.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/madrid_exact_le30",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "f65e2c0a943eb959cd622ab4466f05667d8f484f85e38775685955671971ea04",
+          "size_bytes": 2748
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "6ea0f54090198a866fba0bbb132ec97a209c1f6f74ec99d986cac6488b91a6c7",
+          "size_bytes": 487
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "97fd49560771a93ebdfdb9e833c831258e8702777b38e0c62bbcb33c289cdec7",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "254ad10d92011d27ba77e65f4bbd7c044f466860fcd91fad48fc33cdb5b301f0",
+          "size_bytes": 3146385
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "6ed146ee14d4c42186a456083002246aabf8156fb5d63a1cc3790380097930d9",
+          "size_bytes": 3146385
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "c954977d8ed7ec94dcbd28f782138c51147e1339b2ea11c419b19617ec986cc5",
+          "size_bytes": 49061888
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "eef67db469d9d4f319207b9b2954b96b0999f7b231281d25247dbb41528b7d4a",
+          "size_bytes": 3146385
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "a8883b01f537e28dd066b77515251c364453ee3d83f105fa85433998778191aa",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "ebbed0ddb6231e3d08acfff49d2073005f3b2038dd63776f9bc759dd75ae3e16",
+          "size_bytes": 3146385
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e3d5b019c3c4399bc1447186d0aca61ec0c20160a67cc2ed7cc8ad93c81672be",
+          "size_bytes": 3146385
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "729bd8b201ea1f5f8df1b9db86a8842db4f04347ee8dbba49a279e312addd2bb",
+          "size_bytes": 3146385
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.4797770688921031,
+          "all_buildings_average": 0.3329200079653638,
+          "all_buildings_maximum": 7.501270294189453,
+          "changed_buildings_area_weighted_average": 0.8361033741781169,
+          "changed_buildings_average": 0.6536377250684061,
+          "changed_buildings_maximum": 7.501270294189453,
+          "raster_mean": 0.11076263338327408
+        },
+        "counts": {
+          "buildings_analyzed": 121006,
+          "buildings_cooling_gt_0_01_c": 61586,
+          "buildings_selected": 25040,
+          "buildings_with_valid_cooling": 120936,
+          "selected_roof_area_m2": 16888891.568692885
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/madrid_comparison.gpkg",
+            "sha256": "7e421538577c63c8930414dbaa9cebd867da928a2010d221b0c5b3957f17f13f",
+            "size_bytes": 43905024
+          },
+          "landsat_l2_folder": {
+            "file_count": 27,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+            "sha256": "6806febd35989e1810b3e2e1a59693bce54934302bf3e4cdf0a0e7958c5ee401",
+            "size_bytes": 1013523526
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6055409207423426,
+          "r2_train": 0.7273046968297051,
+          "rmse_test": 2.3748752938366593,
+          "rmse_train": 1.9598544904120825
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 30.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "exact",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.17372641559623933,
+          "target_ndbi": -0.07992667124082531,
+          "target_ndvi": 0.28431087365675817,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 20308241.73625803,
+      "case": {
+        "buildings_file": "madrid_comparison.gpkg",
+        "city": "madrid",
+        "dataset": "madrid",
+        "expected_area_ha": 2030.8242,
+        "expected_count": 25644,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+        "name": "madrid_dominant_le30",
+        "slope_field": "slope_median_deg",
+        "strategy": "dominant",
+        "target_albedo": 0.17372641559623933,
+        "target_ndbi": -0.07992667124082531,
+        "target_ndvi": 0.28431087365675817,
+        "threshold": 30.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/madrid_dominant_le30",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "5059a76c086d850d9c98b0bedb73b79202fe8a36f13764765631ffeeb418fc81",
+          "size_bytes": 2749
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "fcc99c12237853b3faf64cc9a6698c665f94d48c99eee2761edc91ea3b4cf161",
+          "size_bytes": 490
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "f3e3585277223ab61674cca5a92baaf80b44fe59892eb0b32227f09146298c1c",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "254ad10d92011d27ba77e65f4bbd7c044f466860fcd91fad48fc33cdb5b301f0",
+          "size_bytes": 3146385
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "6ed146ee14d4c42186a456083002246aabf8156fb5d63a1cc3790380097930d9",
+          "size_bytes": 3146385
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "72aba782a28de21707e81ca5f1a91cf1674d87eed00d2a9faebff5def65f950f",
+          "size_bytes": 49070080
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "c9e9095e4c73693b00460edb15d215853cff5b467d5abbd0def5f859872abd41",
+          "size_bytes": 3146385
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "a8883b01f537e28dd066b77515251c364453ee3d83f105fa85433998778191aa",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "ebbed0ddb6231e3d08acfff49d2073005f3b2038dd63776f9bc759dd75ae3e16",
+          "size_bytes": 3146385
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e3d5b019c3c4399bc1447186d0aca61ec0c20160a67cc2ed7cc8ad93c81672be",
+          "size_bytes": 3146385
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "c916a209932a2838f5b2c083994292278c9031ab2b2b1c444196f96554927b44",
+          "size_bytes": 3146385
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.599967061229158,
+          "all_buildings_average": 0.34499065270141965,
+          "all_buildings_maximum": 7.501270294189453,
+          "changed_buildings_area_weighted_average": 0.9733292131193708,
+          "changed_buildings_average": 0.6688266090525583,
+          "changed_buildings_maximum": 7.501270294189453,
+          "raster_mean": 0.1354692131280899
+        },
+        "counts": {
+          "buildings_analyzed": 121006,
+          "buildings_cooling_gt_0_01_c": 62370,
+          "buildings_selected": 25644,
+          "buildings_with_valid_cooling": 120936,
+          "selected_roof_area_m2": 20308241.73637203
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/madrid_comparison.gpkg",
+            "sha256": "7e421538577c63c8930414dbaa9cebd867da928a2010d221b0c5b3957f17f13f",
+            "size_bytes": 43905024
+          },
+          "landsat_l2_folder": {
+            "file_count": 27,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_201032_20240723_20240724_02_T1madrid",
+            "sha256": "6806febd35989e1810b3e2e1a59693bce54934302bf3e4cdf0a0e7958c5ee401",
+            "size_bytes": 1013523526
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6055409207423426,
+          "r2_train": 0.7273046968297052,
+          "rmse_test": 2.3748752938366593,
+          "rmse_train": 1.9598544904120825
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 30.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "dominant",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.17372641559623933,
+          "target_ndbi": -0.07992667124082531,
+          "target_ndvi": 0.28431087365675817,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 5548416.017663995,
+      "case": {
+        "buildings_file": "paris_comparison.gpkg",
+        "city": "paris",
+        "dataset": "paris",
+        "expected_area_ha": 554.8416,
+        "expected_count": 8486,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+        "name": "paris_exact_le11",
+        "slope_field": "slope_median_deg",
+        "strategy": "exact",
+        "target_albedo": 0.14593065672091077,
+        "target_ndbi": -0.05327758769465608,
+        "target_ndvi": 0.40624622109631436,
+        "threshold": 11.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/paris_exact_le11",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "2a5dd1c2aebad45983a1d0ef27d4b3dce6f773419fd91ecf29308aeb2b39d889",
+          "size_bytes": 2751
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "c68ded59972647e92dff223cda375897fceed1c6c818acf0d8e5849ddca499ad",
+          "size_bytes": 486
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "3d52e8b6126847a783d0bd8857c2189c958320fc8cf5f7023aa52dc4636b1f13",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "df9d57a1ffbdee343fa8de02907bba74ab0ed8f4ece60a7ceb47cb8ea98a84f8",
+          "size_bytes": 1049169
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "54a022c1cab6596649e0b2e62b7b8d123becfa13b5a06c6f4d5d33c2574c7566",
+          "size_bytes": 1049169
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "f26d3c82d336194ec2be3ad94bf7af3c709a8ed3863658ffde38177259fa9e52",
+          "size_bytes": 51228672
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "79da16518120d86017bdd2831e3de2c1546efa333397aee9d727693bf36c5700",
+          "size_bytes": 1049169
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "da48356cfd94ad0f60d4c94846d8c13918aff182f950c8e66dc901589d5d0f85",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "e16b3783e827ab701c9ed322a5a6cd3e3eee37c1079ef88e25889fbbc6b609e0",
+          "size_bytes": 1049169
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "fb56c1accfff93bba865f516f4ba9e1f33237d205da7e7522f371c5daad1a1a6",
+          "size_bytes": 1049169
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "2c8c255ee95c2e82a2952c3ed79975d6fc533e3a2fd02fee328074fb5e7fbb4f",
+          "size_bytes": 1049169
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.05990797902006263,
+          "all_buildings_average": 0.042428446302380636,
+          "all_buildings_maximum": 2.6587905883789062,
+          "changed_buildings_area_weighted_average": 0.19456526930029627,
+          "changed_buildings_average": 0.19443452998961736,
+          "changed_buildings_maximum": 2.6587905883789062,
+          "raster_mean": 0.03918074071407318
+        },
+        "counts": {
+          "buildings_analyzed": 106391,
+          "buildings_cooling_gt_0_01_c": 23004,
+          "buildings_selected": 8486,
+          "buildings_with_valid_cooling": 105608,
+          "selected_roof_area_m2": 5545457.7540768795
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/paris_comparison.gpkg",
+            "sha256": "8ee65899aee479b66e472009c403621c2fe17a58150e88889f37ad0576a5b26c",
+            "size_bytes": 46993408
+          },
+          "landsat_l2_folder": {
+            "file_count": 29,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+            "sha256": "a286c69b2f31a9c8261237fa37ef7b674dfa4860a6df0f1f3db8f385a3aebaa9",
+            "size_bytes": 1022704071
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.3369832547451037,
+          "r2_train": 0.6644901819424455,
+          "rmse_test": 2.388616239611432,
+          "rmse_train": 1.7407963564899434
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 11.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "exact",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.14593065672091077,
+          "target_ndbi": -0.05327758769465608,
+          "target_ndvi": 0.40624622109631436,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 5918603.104615502,
+      "case": {
+        "buildings_file": "paris_comparison.gpkg",
+        "city": "paris",
+        "dataset": "paris",
+        "expected_area_ha": 591.8603,
+        "expected_count": 8557,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+        "name": "paris_dominant_le11",
+        "slope_field": "slope_median_deg",
+        "strategy": "dominant",
+        "target_albedo": 0.14593065672091077,
+        "target_ndbi": -0.05327758769465608,
+        "target_ndvi": 0.40624622109631436,
+        "threshold": 11.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/paris_dominant_le11",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "c8de2da2ad0171a03b359e5a7c9d36004a0d6fb48e0b20370f60bde44e1e56da",
+          "size_bytes": 2749
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "8769922808fbbc57fa39f9f05f0658587245fb8c5eb6285f0f862d0b58c6588b",
+          "size_bytes": 489
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "9c81b352f928ffa71573fbb0d71f8242db528541a9015fde5dfa96605110d760",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "df9d57a1ffbdee343fa8de02907bba74ab0ed8f4ece60a7ceb47cb8ea98a84f8",
+          "size_bytes": 1049169
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "54a022c1cab6596649e0b2e62b7b8d123becfa13b5a06c6f4d5d33c2574c7566",
+          "size_bytes": 1049169
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "d50ac4838f35077cdcbf2330fde47baebd247a1406423905824e60615549e59a",
+          "size_bytes": 51232768
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "91f0c7097476e0068a47ac433ecbcf1831df9e1abcd86048a3eaa2cf84647b36",
+          "size_bytes": 1049169
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "da48356cfd94ad0f60d4c94846d8c13918aff182f950c8e66dc901589d5d0f85",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "e16b3783e827ab701c9ed322a5a6cd3e3eee37c1079ef88e25889fbbc6b609e0",
+          "size_bytes": 1049169
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "fb56c1accfff93bba865f516f4ba9e1f33237d205da7e7522f371c5daad1a1a6",
+          "size_bytes": 1049169
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "3049145e3311f98168dd82533a509e7da860183c7397bdb67c0a295ea73de4e7",
+          "size_bytes": 1049169
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.06417047400431078,
+          "all_buildings_average": 0.04306640861324484,
+          "all_buildings_maximum": 2.6587905883789062,
+          "changed_buildings_area_weighted_average": 0.2034463900556259,
+          "changed_buildings_average": 0.19609298250673046,
+          "changed_buildings_maximum": 2.6587905883789062,
+          "raster_mean": 0.04179108887910843
+        },
+        "counts": {
+          "buildings_analyzed": 106391,
+          "buildings_cooling_gt_0_01_c": 23153,
+          "buildings_selected": 8557,
+          "buildings_with_valid_cooling": 105608,
+          "selected_roof_area_m2": 5915447.4547969
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/paris_comparison.gpkg",
+            "sha256": "8ee65899aee479b66e472009c403621c2fe17a58150e88889f37ad0576a5b26c",
+            "size_bytes": 46993408
+          },
+          "landsat_l2_folder": {
+            "file_count": 29,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+            "sha256": "a286c69b2f31a9c8261237fa37ef7b674dfa4860a6df0f1f3db8f385a3aebaa9",
+            "size_bytes": 1022704071
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.3369832547451037,
+          "r2_train": 0.6644901819424456,
+          "rmse_test": 2.388616239611432,
+          "rmse_train": 1.7407963564899436
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 11.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "dominant",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.14593065672091077,
+          "target_ndbi": -0.05327758769465608,
+          "target_ndvi": 0.40624622109631436,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 13588059.631059121,
+      "case": {
+        "buildings_file": "paris_comparison.gpkg",
+        "city": "paris",
+        "dataset": "paris",
+        "expected_area_ha": 1358.806,
+        "expected_count": 34880,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+        "name": "paris_exact_le30",
+        "slope_field": "slope_median_deg",
+        "strategy": "exact",
+        "target_albedo": 0.14593065672091077,
+        "target_ndbi": -0.05327758769465608,
+        "target_ndvi": 0.40624622109631436,
+        "threshold": 30.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/paris_exact_le30",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "3df29a737faf58cc5d412c6bc0189216b24f4b7120656e6fc429cf67248214d4",
+          "size_bytes": 2750
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "6f78ae0219905cf9a2a713fd0b110023d5b2e55fc154a693a623540e7bee8c59",
+          "size_bytes": 487
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "0f5d5ebaca72b52b3210e7791139f475b9d49ec56b99408c7019009762459e57",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "df9d57a1ffbdee343fa8de02907bba74ab0ed8f4ece60a7ceb47cb8ea98a84f8",
+          "size_bytes": 1049169
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "54a022c1cab6596649e0b2e62b7b8d123becfa13b5a06c6f4d5d33c2574c7566",
+          "size_bytes": 1049169
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "6e83b1858a6aa68d00d9b8561fa490b0e769dbe94117a5e98faffb337d1396b0",
+          "size_bytes": 51843072
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "9d6bbb6d146ac674948cb51d2545373ea1687bf160aca78c3a817859d8bc50fd",
+          "size_bytes": 1049169
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "da48356cfd94ad0f60d4c94846d8c13918aff182f950c8e66dc901589d5d0f85",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "e16b3783e827ab701c9ed322a5a6cd3e3eee37c1079ef88e25889fbbc6b609e0",
+          "size_bytes": 1049169
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "fb56c1accfff93bba865f516f4ba9e1f33237d205da7e7522f371c5daad1a1a6",
+          "size_bytes": 1049169
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "20e84106b6658566f91acd9258e2aac1f992b7509488f73dc03231cb7bd02a91",
+          "size_bytes": 1049169
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.15371657901364008,
+          "all_buildings_average": 0.15400775078455467,
+          "all_buildings_maximum": 3.303813934326172,
+          "changed_buildings_area_weighted_average": 0.25544596223793803,
+          "changed_buildings_average": 0.27829945173147047,
+          "changed_buildings_maximum": 3.303813934326172,
+          "raster_mean": 0.09322279691696167
+        },
+        "counts": {
+          "buildings_analyzed": 106391,
+          "buildings_cooling_gt_0_01_c": 58402,
+          "buildings_selected": 34880,
+          "buildings_with_valid_cooling": 105608,
+          "selected_roof_area_m2": 13580792.84632432
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/paris_comparison.gpkg",
+            "sha256": "8ee65899aee479b66e472009c403621c2fe17a58150e88889f37ad0576a5b26c",
+            "size_bytes": 46993408
+          },
+          "landsat_l2_folder": {
+            "file_count": 29,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+            "sha256": "a286c69b2f31a9c8261237fa37ef7b674dfa4860a6df0f1f3db8f385a3aebaa9",
+            "size_bytes": 1022704071
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.33698325474510393,
+          "r2_train": 0.6644901819424455,
+          "rmse_test": 2.3886162396114314,
+          "rmse_train": 1.7407963564899434
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 30.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "exact",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.14593065672091077,
+          "target_ndbi": -0.05327758769465608,
+          "target_ndvi": 0.40624622109631436,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 14180886.665604476,
+      "case": {
+        "buildings_file": "paris_comparison.gpkg",
+        "city": "paris",
+        "dataset": "paris",
+        "expected_area_ha": 1418.0887,
+        "expected_count": 34997,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+        "name": "paris_dominant_le30",
+        "slope_field": "slope_median_deg",
+        "strategy": "dominant",
+        "target_albedo": 0.14593065672091077,
+        "target_ndbi": -0.05327758769465608,
+        "target_ndvi": 0.40624622109631436,
+        "threshold": 30.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/paris_dominant_le30",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "7f06e55e375aed4cff3d4eed0543e74d25570d9b75bca287eb4f08ee5e802a38",
+          "size_bytes": 2751
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "cfcccadaa77782ffd8c9463c1fc71cf82588f053a68c5d21df269e7dcf287dfa",
+          "size_bytes": 490
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "979fd95b8204717c38b5d810c41629b02c99300edba549507d9b2c3d883ca7ac",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "df9d57a1ffbdee343fa8de02907bba74ab0ed8f4ece60a7ceb47cb8ea98a84f8",
+          "size_bytes": 1049169
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "54a022c1cab6596649e0b2e62b7b8d123becfa13b5a06c6f4d5d33c2574c7566",
+          "size_bytes": 1049169
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "30824e9244f90f3930a05c4850db5bb91b16c5bdb22ede77202bb527b65c5a8d",
+          "size_bytes": 51843072
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "0cef578f65adcaaf69c2a3c3b4878e912e5d0c64f5c82d31f06a077e2b36de1f",
+          "size_bytes": 1049169
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "da48356cfd94ad0f60d4c94846d8c13918aff182f950c8e66dc901589d5d0f85",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "e16b3783e827ab701c9ed322a5a6cd3e3eee37c1079ef88e25889fbbc6b609e0",
+          "size_bytes": 1049169
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "fb56c1accfff93bba865f516f4ba9e1f33237d205da7e7522f371c5daad1a1a6",
+          "size_bytes": 1049169
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "64a61f3fb0c0161de041fd8c4eca8aa6f380b4fcf75762489eb4c1003f53fe71",
+          "size_bytes": 1049169
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.16033193790558384,
+          "all_buildings_average": 0.15506539642843822,
+          "all_buildings_maximum": 3.303813934326172,
+          "changed_buildings_area_weighted_average": 0.26323359139599023,
+          "changed_buildings_average": 0.27957156360039254,
+          "changed_buildings_maximum": 3.303813934326172,
+          "raster_mean": 0.09715735912322998
+        },
+        "counts": {
+          "buildings_analyzed": 106391,
+          "buildings_cooling_gt_0_01_c": 58536,
+          "buildings_selected": 34997,
+          "buildings_with_valid_cooling": 105608,
+          "selected_roof_area_m2": 14173301.689307768
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/paris_comparison.gpkg",
+            "sha256": "8ee65899aee479b66e472009c403621c2fe17a58150e88889f37ad0576a5b26c",
+            "size_bytes": 46993408
+          },
+          "landsat_l2_folder": {
+            "file_count": 29,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_199026_20240810_20240811_02_T1paris",
+            "sha256": "a286c69b2f31a9c8261237fa37ef7b674dfa4860a6df0f1f3db8f385a3aebaa9",
+            "size_bytes": 1022704071
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.3369832547451034,
+          "r2_train": 0.6644901819424456,
+          "rmse_test": 2.388616239611432,
+          "rmse_train": 1.740796356489943
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 30.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "dominant",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "slope_median_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.14593065672091077,
+          "target_ndbi": -0.05327758769465608,
+          "target_ndvi": 0.40624622109631436,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 33322716.197070356,
+      "case": {
+        "buildings_file": "hamburg_old_comparison.gpkg",
+        "city": "hamburg",
+        "dataset": "hamburg_old",
+        "expected_area_ha": 3332.2716,
+        "expected_count": 59547,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+        "name": "hamburg_old_exact_le15",
+        "slope_field": "roof_slope_mean_deg",
+        "strategy": "exact",
+        "target_albedo": 0.1435968737428123,
+        "target_ndbi": -0.15313389460307741,
+        "target_ndvi": 0.5098841067653748,
+        "threshold": 15.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/hamburg_old_exact_le15",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "b62cc1a0554e669fc28af8b08c071110b6df22e91d00c72ef02c86cbf30258e0",
+          "size_bytes": 2754
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "ae77a0932d71e3631c1e6a73b2abb1f4774e67503a3ab8ab962c3e1cf0d8485a",
+          "size_bytes": 488
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "c59e435bb5b2ee45b6cc273e128d5b6d3638760a2446e983d2ebf5a42bb92bd1",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "06477b30bc00f5b1b83b97f7c8b896f1d1f7693768697d0085d4fc8d135569a7",
+          "size_bytes": 7865121
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "1a319678485c42533ec69eb22cc3e4ff4acef1e1e31c85ef36387d41ce599462",
+          "size_bytes": 7865121
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "1dac47ea78afb6bafda2590f1bbccb4173e291a26e3d6a927349cc014db58a7e",
+          "size_bytes": 78561280
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "32753670642313c4b39f7ea498d0ca3127d5101646a19d621ae0a8436efffe82",
+          "size_bytes": 7865121
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "4ae87e2b03897deaf8cddb76c78365294055313e590372eb61a58b48f63b8f3e",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "c15bc2139b5d48522461499ec3749710a12e9e5805850c8bebc165bcf44888aa",
+          "size_bytes": 7865121
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e0717eed8b083b572f89bc978c31a9d51dd3af53a393f6b87c67908b986b138e",
+          "size_bytes": 7865121
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "7de2f395ff3c27584518eba15e1e3b4cf52bf75ba419c0dd77e2200af21e5654",
+          "size_bytes": 7865121
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.7540304764638482,
+          "all_buildings_average": 0.24430089716003112,
+          "all_buildings_maximum": 7.591522216796875,
+          "changed_buildings_area_weighted_average": 1.241448536735366,
+          "changed_buildings_average": 0.6932945099503909,
+          "changed_buildings_maximum": 7.591522216796875,
+          "raster_mean": 0.07331737875938416
+        },
+        "counts": {
+          "buildings_analyzed": 194799,
+          "buildings_cooling_gt_0_01_c": 68530,
+          "buildings_selected": 59547,
+          "buildings_with_valid_cooling": 194545,
+          "selected_roof_area_m2": 33322716.196752537
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/hamburg_old_comparison.gpkg",
+            "sha256": "9ed9af6e8e9387afdb9501423aa33cfe02a57c9088497bd03399e02e3b6f1bb8",
+            "size_bytes": 70078464
+          },
+          "landsat_l2_folder": {
+            "file_count": 31,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+            "sha256": "2c34a32d4c796b1e3a2e4a41ea44e53527fc277d642e58629fbccc0ae66564ca",
+            "size_bytes": 1015652745
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6767503028902688,
+          "r2_train": 0.7563475470769399,
+          "rmse_test": 2.3022952241180494,
+          "rmse_train": 1.979990799956283
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 15.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "exact",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "roof_slope_mean_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.1435968737428123,
+          "target_ndbi": -0.15313389460307741,
+          "target_ndvi": 0.5098841067653748,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 35497169.977077104,
+      "case": {
+        "buildings_file": "hamburg_old_comparison.gpkg",
+        "city": "hamburg",
+        "dataset": "hamburg_old",
+        "expected_area_ha": 3549.717,
+        "expected_count": 59947,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+        "name": "hamburg_old_dominant_le15",
+        "slope_field": "roof_slope_mean_deg",
+        "strategy": "dominant",
+        "target_albedo": 0.1435968737428123,
+        "target_ndbi": -0.15313389460307741,
+        "target_ndvi": 0.5098841067653748,
+        "threshold": 15.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/hamburg_old_dominant_le15",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "cf279da9ee24265cf0936c51399682d8dd12a0e12da640afc9efa577aea0c5d3",
+          "size_bytes": 2754
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "2352f62f8856cba4c039e96c983a6ee2cb9efee7bd472fe059832eae7daf3398",
+          "size_bytes": 491
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "93416ed4736deabcb3dcbe085a27d87f9dc1aa3846104f4d41b0487e5cf00676",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "06477b30bc00f5b1b83b97f7c8b896f1d1f7693768697d0085d4fc8d135569a7",
+          "size_bytes": 7865121
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "1a319678485c42533ec69eb22cc3e4ff4acef1e1e31c85ef36387d41ce599462",
+          "size_bytes": 7865121
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "500ab6fb4bcf46ed757f2accc813ab8ef831f509517548e154e114bab00132ad",
+          "size_bytes": 78565376
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "641aac44c12180d61d40afc230cfe5fa4d18278b00d24e725ec0c52f062569d8",
+          "size_bytes": 7865121
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "4ae87e2b03897deaf8cddb76c78365294055313e590372eb61a58b48f63b8f3e",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "c15bc2139b5d48522461499ec3749710a12e9e5805850c8bebc165bcf44888aa",
+          "size_bytes": 7865121
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e0717eed8b083b572f89bc978c31a9d51dd3af53a393f6b87c67908b986b138e",
+          "size_bytes": 7865121
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "499dcf822382c9cf2d2b3b330bafff81bea508cf27964a7aadea1e9e3bbefe9a",
+          "size_bytes": 7865121
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.8388669352256677,
+          "all_buildings_average": 0.2517203901102921,
+          "all_buildings_maximum": 7.591522216796875,
+          "changed_buildings_area_weighted_average": 1.35957026711202,
+          "changed_buildings_average": 0.7116475525992584,
+          "changed_buildings_maximum": 7.591522216796875,
+          "raster_mean": 0.08026143908500671
+        },
+        "counts": {
+          "buildings_analyzed": 194799,
+          "buildings_cooling_gt_0_01_c": 68791,
+          "buildings_selected": 59947,
+          "buildings_with_valid_cooling": 194545,
+          "selected_roof_area_m2": 35497169.97673926
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/hamburg_old_comparison.gpkg",
+            "sha256": "9ed9af6e8e9387afdb9501423aa33cfe02a57c9088497bd03399e02e3b6f1bb8",
+            "size_bytes": 70078464
+          },
+          "landsat_l2_folder": {
+            "file_count": 31,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+            "sha256": "2c34a32d4c796b1e3a2e4a41ea44e53527fc277d642e58629fbccc0ae66564ca",
+            "size_bytes": 1015652745
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6767503028902688,
+          "r2_train": 0.7563475470769399,
+          "rmse_test": 2.3022952241180494,
+          "rmse_train": 1.979990799956283
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 15.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "dominant",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "roof_slope_mean_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.1435968737428123,
+          "target_ndbi": -0.15313389460307741,
+          "target_ndvi": 0.5098841067653748,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 33329568.04701037,
+      "case": {
+        "buildings_file": "hamburg_new_comparison.gpkg",
+        "city": "hamburg",
+        "dataset": "hamburg_new",
+        "expected_area_ha": 3332.9568,
+        "expected_count": 59551,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+        "name": "hamburg_new_exact_le15",
+        "slope_field": "roof_slope_mean_deg",
+        "strategy": "exact",
+        "target_albedo": 0.1435968737428123,
+        "target_ndbi": -0.15313389460307741,
+        "target_ndvi": 0.5098841067653748,
+        "threshold": 15.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/hamburg_new_exact_le15",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "59572d9c4013a7955967060d9e5613a54cb47e8396dd711c94f7c4abd570ca62",
+          "size_bytes": 2753
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "712e967e50dfdbf2399c7a0b0cf5698e4b2479fc45c9b38f78645292297a60e8",
+          "size_bytes": 488
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "cfd4e122ff0dcc5e0356308f06025fa387945c8242d943a407e933eae35f52ad",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "06477b30bc00f5b1b83b97f7c8b896f1d1f7693768697d0085d4fc8d135569a7",
+          "size_bytes": 7865121
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "1a319678485c42533ec69eb22cc3e4ff4acef1e1e31c85ef36387d41ce599462",
+          "size_bytes": 7865121
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "bbad5b153b47c0acb98c0b3ca24321603a8f9926ddbd298d71e631f6a87c98f2",
+          "size_bytes": 78561280
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "9a662f968e49f426b0f91618e444c8268977f8d9ca031c6dabe4c69c7a2fd250",
+          "size_bytes": 7865121
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "4ae87e2b03897deaf8cddb76c78365294055313e590372eb61a58b48f63b8f3e",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "c15bc2139b5d48522461499ec3749710a12e9e5805850c8bebc165bcf44888aa",
+          "size_bytes": 7865121
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e0717eed8b083b572f89bc978c31a9d51dd3af53a393f6b87c67908b986b138e",
+          "size_bytes": 7865121
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "18230d8a2b88a5cbac832608a5b2949c755604f29aa08af3119c1679620435c2",
+          "size_bytes": 7865121
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.7543454439237893,
+          "all_buildings_average": 0.24443567188897083,
+          "all_buildings_maximum": 7.591522216796875,
+          "changed_buildings_area_weighted_average": 1.241722948421667,
+          "changed_buildings_average": 0.6936266406548831,
+          "changed_buildings_maximum": 7.591522216796875,
+          "raster_mean": 0.0733562782406807
+        },
+        "counts": {
+          "buildings_analyzed": 194799,
+          "buildings_cooling_gt_0_01_c": 68535,
+          "buildings_selected": 59551,
+          "buildings_with_valid_cooling": 194545,
+          "selected_roof_area_m2": 33329568.046692476
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/hamburg_new_comparison.gpkg",
+            "sha256": "3319aa818b530def20bf2aab740a1e354a1ebd075b632e72172b31a53eebdba8",
+            "size_bytes": 70078464
+          },
+          "landsat_l2_folder": {
+            "file_count": 31,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+            "sha256": "2c34a32d4c796b1e3a2e4a41ea44e53527fc277d642e58629fbccc0ae66564ca",
+            "size_bytes": 1015652745
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6767503028902688,
+          "r2_train": 0.7563475470769399,
+          "rmse_test": 2.3022952241180494,
+          "rmse_train": 1.979990799956283
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 15.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "exact",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "roof_slope_mean_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.1435968737428123,
+          "target_ndbi": -0.15313389460307741,
+          "target_ndvi": 0.5098841067653748,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "candidate_area_source_crs_m2": 35490361.32938654,
+      "case": {
+        "buildings_file": "hamburg_new_comparison.gpkg",
+        "city": "hamburg",
+        "dataset": "hamburg_new",
+        "expected_area_ha": 3549.0361,
+        "expected_count": 59949,
+        "l2_folder": "data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+        "name": "hamburg_new_dominant_le15",
+        "slope_field": "roof_slope_mean_deg",
+        "strategy": "dominant",
+        "target_albedo": 0.1435968737428123,
+        "target_ndbi": -0.15313389460307741,
+        "target_ndvi": 0.5098841067653748,
+        "threshold": 15.0
+      },
+      "maximum_delta_c": 0.0,
+      "output_dir": "/Users/jaenix/Documents/lst_rooftype_material/outputs/scenarios/legacy_material_slope_comparison_2026-07-13/hamburg_new_dominant_le15",
+      "output_files": {
+        "_greening_provenance.json": {
+          "kind": "file",
+          "sha256": "c6aea3ba8a2fef32b4015dbb156ce8f1575c38cd2aed16f3cb9b5844b7925be3",
+          "size_bytes": 2755
+        },
+        "_greening_provenance.txt": {
+          "kind": "file",
+          "sha256": "ee9a90edd85c70289299dc48bac3a4eb9d616902ed86c676872ba6d198147f05",
+          "size_bytes": 491
+        },
+        "_greening_statistics.txt": {
+          "kind": "file",
+          "sha256": "c3189124ea15e1b8f959157c838b2ea60e536ee1d57e2ceaf2530761ef3db786",
+          "size_bytes": 403
+        },
+        "albedo.tif": {
+          "kind": "file",
+          "sha256": "06477b30bc00f5b1b83b97f7c8b896f1d1f7693768697d0085d4fc8d135569a7",
+          "size_bytes": 7865121
+        },
+        "baseline_LST.tif": {
+          "kind": "file",
+          "sha256": "1a319678485c42533ec69eb22cc3e4ff4acef1e1e31c85ef36387d41ce599462",
+          "size_bytes": 7865121
+        },
+        "buildings_greening_impact.gpkg": {
+          "kind": "file",
+          "sha256": "0e7acf8160905666caa76981ec0c859bb3dca20aee3eb4fb99e0de9537bf3395",
+          "size_bytes": 78565376
+        },
+        "delta_LST.tif": {
+          "kind": "file",
+          "sha256": "1be71afc8f799b2bfecbf01f2840e5ced7797e7f3fa61ac1cf8f92066465a242",
+          "size_bytes": 7865121
+        },
+        "model_feature_importance.txt": {
+          "kind": "file",
+          "sha256": "4ae87e2b03897deaf8cddb76c78365294055313e590372eb61a58b48f63b8f3e",
+          "size_bytes": 83
+        },
+        "ndbi.tif": {
+          "kind": "file",
+          "sha256": "c15bc2139b5d48522461499ec3749710a12e9e5805850c8bebc165bcf44888aa",
+          "size_bytes": 7865121
+        },
+        "ndvi.tif": {
+          "kind": "file",
+          "sha256": "e0717eed8b083b572f89bc978c31a9d51dd3af53a393f6b87c67908b986b138e",
+          "size_bytes": 7865121
+        },
+        "scenario_pred_LST.tif": {
+          "kind": "file",
+          "sha256": "7422580e00b4786e427b7a34771f28feb57d7b87d1810d633fd5de5bb8fdd610",
+          "size_bytes": 7865121
+        }
+      },
+      "provenance": {
+        "cooling_statistics_c": {
+          "all_buildings_area_weighted_average": 0.838567344990602,
+          "all_buildings_average": 0.25174550763096093,
+          "all_buildings_maximum": 7.591522216796875,
+          "changed_buildings_area_weighted_average": 1.3613347800643567,
+          "changed_buildings_average": 0.7117290733542391,
+          "changed_buildings_maximum": 7.591522216796875,
+          "raster_mean": 0.08036545664072037
+        },
+        "counts": {
+          "buildings_analyzed": 194799,
+          "buildings_cooling_gt_0_01_c": 68790,
+          "buildings_selected": 59949,
+          "buildings_with_valid_cooling": 194545,
+          "selected_roof_area_m2": 35490361.329049
+        },
+        "environment": {
+          "gdal": "3.12.1",
+          "geopandas": "1.1.4",
+          "green-roof-scenario-installed": "0.2.0",
+          "green-roof-scenario-source": "0.1.1",
+          "numpy": "2.5.1",
+          "pandas": "3.0.3",
+          "proj": "9.5.1",
+          "python": "3.13.5",
+          "rasterio": "1.5.0",
+          "rasterstats": "0.21.0",
+          "scikit-learn": "1.9.0",
+          "shapely": "2.1.2"
+        },
+        "git_commit": "033b066b106cfcb960a9c7a901cf9de8aca53030",
+        "inputs": {
+          "buildings": {
+            "kind": "file",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/buildings/legacy_material_slope_comparison_2026-07-13/hamburg_new_comparison.gpkg",
+            "sha256": "3319aa818b530def20bf2aab740a1e354a1ebd075b632e72172b31a53eebdba8",
+            "size_bytes": 70078464
+          },
+          "landsat_l2_folder": {
+            "file_count": 31,
+            "kind": "directory-tree",
+            "path": "/Users/jaenix/Documents/lst_rooftype_material/data/raw/landsat/LC09_L2SP_196023_20250621_20250622_02_T1hamburg",
+            "sha256": "2c34a32d4c796b1e3a2e4a41ea44e53527fc277d642e58629fbccc0ae66564ca",
+            "size_bytes": 1015652745
+          }
+        },
+        "model_diagnostics": {
+          "r2_test": 0.6767503028902688,
+          "r2_train": 0.7563475470769399,
+          "rmse_test": 2.3022952241180494,
+          "rmse_train": 1.9799907999562827
+        },
+        "parameters": {
+          "all_touched": false,
+          "analysis_extent": "building_extent",
+          "build_lst": true,
+          "clip_positive_delta": true,
+          "keep_lst_water": false,
+          "lst_unit": "celsius",
+          "max_roof_slope_deg": 15.0,
+          "min_roof_area": 0.0,
+          "min_sample_spacing": 100,
+          "model": "rf",
+          "random_state": 42,
+          "roof_material_cov_field": "material_cov",
+          "roof_material_field": "predicted_roof_materials",
+          "roof_material_strategy": "dominant",
+          "roof_materials_type": "0,4",
+          "roof_shape_field": null,
+          "roof_shape_type": null,
+          "roof_slope_field": "roof_slope_mean_deg",
+          "sample_frac": 0.1,
+          "supersample": 8,
+          "target_albedo": 0.1435968737428123,
+          "target_ndbi": -0.15313389460307741,
+          "target_ndvi": 0.5098841067653748,
+          "write_indices_rasters": true,
+          "write_pred_baseline": false
+        },
+        "schema_version": 1
+      }
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "kind": "file",
+    "path": "/private/tmp/lst-roof-legacy-v011/reports/legacy_material_slope_comparison_2026-07-13.md",
+    "sha256": "fbe0735c9a19187b0cf0f38089f0bd2000203b82e4997f07c0dc40e9a28fc1b5",
+    "size_bytes": 4990
+  },
+  "validations": {
+    "all_deltas_non_positive": "passed",
+    "expected_counts_and_areas": "passed",
+    "hamburg_old_historical_reproduction": "passed",
+    "model_diagnostics_identical_within_city": {
+      "absolute_tolerance": 1e-12,
+      "maximum_absolute_difference": 4.440892098500626e-16,
+      "status": "passed"
+    }
+  }
+}

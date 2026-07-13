@@ -230,6 +230,7 @@ def write_summary(records: list[dict[str, object]], summary_path: Path, manifest
         "```",
         "",
         "Each case uses building extent, Celsius LST, RF, sample fraction `0.1`, spacing `100 m`, seed `42`, supersampling `8`, material classes `0,4`, positive-delta clipping, and index-raster output. No administrative boundary or baseline-prediction raster is used.",
+        "Candidate areas are measured in each prepared layer's projected source CRS; each run's provenance also records the selected area after reprojection to the Landsat analysis CRS.",
         "",
         "## Scenario results",
         "",
