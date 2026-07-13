@@ -15,6 +15,8 @@ class ScenarioConfig:
     buildings: Path
     roof_material_field: str | None = "predictedrooftypematerial"
     roof_materials_type: str | None = None
+    roof_material_strategy: str = "legacy"
+    roof_material_cov_field: str = "material_cov"
     roof_shape_field: str | None = None
     roof_shape_type: str | None = None
     roof_slope_field: str | None = "roof_slope_mean_deg"
@@ -51,3 +53,5 @@ class ScenarioConfig:
             self.lst = Path(self.lst)
         if self.boundary is not None:
             self.boundary = Path(self.boundary)
+        if self.roof_material_strategy not in {"legacy", "exact", "dominant"}:
+            raise ValueError("roof_material_strategy must be one of: legacy, exact, dominant")

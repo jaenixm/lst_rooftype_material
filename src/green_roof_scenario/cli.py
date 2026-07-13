@@ -43,6 +43,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Comma-separated roof material types to convert to green (e.g., 'concrete,bitumen').",
     )
     parser.add_argument(
+        "--roof_material_strategy",
+        choices=["legacy", "exact", "dominant"],
+        default="legacy",
+        help=(
+            "Material selection strategy: historical first-value parsing ('legacy'), "
+            "single-material records only ('exact'), or maximum-coverage material ('dominant')."
+        ),
+    )
+    parser.add_argument(
+        "--roof_material_cov_field",
+        default="material_cov",
+        help="Coverage-array field validated by exact/dominant strategies (default: material_cov).",
+    )
+    parser.add_argument(
         "--roof_shape_field",
         default=None,
         help="Roof shape field in the buildings layer (optional).",
@@ -184,6 +198,8 @@ def parse_args(argv: Sequence[str] | None = None) -> ScenarioConfig:
         buildings=args.buildings,
         roof_material_field=args.roof_material_field,
         roof_materials_type=args.roof_materials_type,
+        roof_material_strategy=args.roof_material_strategy,
+        roof_material_cov_field=args.roof_material_cov_field,
         roof_shape_field=args.roof_shape_field,
         roof_shape_type=args.roof_shape_type,
         roof_slope_field=args.roof_slope_field,

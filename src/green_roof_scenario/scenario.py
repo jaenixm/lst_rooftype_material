@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,6 +20,7 @@ from .io import read_raster, save_raster
 from .l2 import build_lst_from_l2, compute_ndvi_albedo_from_l2
 from .masking import roof_mask_fraction, subset_buildings
 from .modeling import fit_model, predict_model, predict_partial
+from .provenance import environment_versions, git_commit, sha256_path
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ class ScenarioOutputs:
     baseline_pred_raster: Optional[Path] = None
     roof_fraction_raster: Optional[Path] = None
     feature_importance: Optional[Path] = None
+    provenance: Optional[Path] = None
 
 
 def _load_boundary(boundary_path: Path, target_crs) -> tuple[list[dict], gpd.GeoDataFrame]:
@@ -136,12 +139,19 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         roof_slope_field=config.roof_slope_field,
         max_roof_slope_deg=config.max_roof_slope_deg,
         keep_null_roof=config.keep_null_roof,
+        roof_material_strategy=config.roof_material_strategy,
+        roof_material_cov_field=config.roof_material_cov_field,
     )
     if config.min_roof_area > 0:
         bld_green = bld_green[bld_green.geometry.area >= config.min_roof_area].copy()
 
     if bld_green.empty:
         raise ValueError("No buildings match the requested roof types to green.")
+
+    buildings["selected_for_greening"] = buildings.index.isin(bld_green.index)
+    analyzed_building_count = int(len(buildings))
+    selected_building_count = int(len(bld_green))
+    selected_roof_area_m2 = float(bld_green.geometry.area.sum())
 
     ndvi, albedo, ndbi, _ = compute_ndvi_albedo_from_l2(config.l2_folder, lst_path)
 
@@ -365,6 +375,7 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
 
     provenance = (
         f"Roof material field/types: {config.roof_material_field} / {config.roof_materials_type}\n"
+        f"Roof material strategy/coverage field: {config.roof_material_strategy} / {config.roof_material_cov_field}\n"
         f"Roof shape field/types: {config.roof_shape_field} / {config.roof_shape_type}\n"
         f"Roof slope field/max deg: {config.roof_slope_field} / {config.max_roof_slope_deg}\n"
         f"Analysis extent: {clip_source}\n"
@@ -374,12 +385,77 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         f"Supersample: {config.supersample}\n"
         f"Model type: {config.model}\n"
         f"Used NDBI predictor: yes\n"
+        f"Buildings analyzed/selected: {analyzed_building_count} / {selected_building_count}\n"
     )
     if config.build_lst:
         provenance += f"LST build options: unit={config.lst_unit}, keep_water={config.keep_lst_water}\n"
 
     provenance_path = out_dir / "_greening_provenance.txt"
     provenance_path.write_text(provenance, encoding="utf-8")
+
+    input_paths: dict[str, Path] = {
+        "buildings": config.buildings,
+        "landsat_l2_folder": config.l2_folder,
+    }
+    if config.boundary is not None:
+        input_paths["boundary"] = config.boundary
+    if not config.build_lst and config.lst is not None:
+        input_paths["lst"] = config.lst
+    provenance_json = {
+        "schema_version": 1,
+        "git_commit": git_commit(),
+        "environment": environment_versions(),
+        "inputs": {
+            name: {"path": str(path.resolve()), **sha256_path(str(path.resolve()))}
+            for name, path in input_paths.items()
+        },
+        "parameters": {
+            "roof_material_field": config.roof_material_field,
+            "roof_materials_type": config.roof_materials_type,
+            "roof_material_strategy": config.roof_material_strategy,
+            "roof_material_cov_field": config.roof_material_cov_field,
+            "roof_shape_field": config.roof_shape_field,
+            "roof_shape_type": config.roof_shape_type,
+            "roof_slope_field": config.roof_slope_field,
+            "max_roof_slope_deg": config.max_roof_slope_deg,
+            "min_roof_area": config.min_roof_area,
+            "analysis_extent": clip_source,
+            "target_ndvi": target_ndvi,
+            "target_albedo": target_albedo,
+            "target_ndbi": target_ndbi,
+            "build_lst": config.build_lst,
+            "lst_unit": config.lst_unit,
+            "keep_lst_water": config.keep_lst_water,
+            "model": config.model,
+            "sample_frac": config.sample_frac,
+            "min_sample_spacing": config.min_sample_spacing,
+            "random_state": config.random_state,
+            "supersample": config.supersample,
+            "all_touched": config.all_touched,
+            "clip_positive_delta": config.clip_positive_delta,
+            "write_indices_rasters": config.write_indices_rasters,
+            "write_pred_baseline": config.write_pred_baseline,
+        },
+        "counts": {
+            "buildings_analyzed": analyzed_building_count,
+            "buildings_selected": selected_building_count,
+            "selected_roof_area_m2": selected_roof_area_m2,
+            "buildings_with_valid_cooling": int(len(cooling_valid)),
+            "buildings_cooling_gt_0_01_c": int(len(changed)),
+        },
+        "model_diagnostics": {key: float(value) for key, value in metrics.items()},
+        "cooling_statistics_c": {
+            "raster_mean": city_mean_cooling,
+            "all_buildings_average": all_avg,
+            "all_buildings_area_weighted_average": all_weighted,
+            "all_buildings_maximum": all_max,
+            "changed_buildings_average": ch_avg,
+            "changed_buildings_area_weighted_average": ch_weighted,
+            "changed_buildings_maximum": ch_max,
+        },
+    }
+    provenance_json_path = out_dir / "_greening_provenance.json"
+    provenance_json_path.write_text(json.dumps(provenance_json, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     logger.info("Scenario written to %s", out_dir)
 
@@ -392,4 +468,5 @@ def run_scenario(config: ScenarioConfig) -> ScenarioOutputs:
         baseline_pred_raster=baseline_pred_path,
         roof_fraction_raster=roof_fraction_raster,
         feature_importance=feature_importance_path,
+        provenance=provenance_json_path,
     )

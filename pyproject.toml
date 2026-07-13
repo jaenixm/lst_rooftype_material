@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "green-roof-scenario"
-version = "0.1.0"
+version = "0.1.1"
 description = "Empirical Landsat-based green roof scenario modeling."
 readme = "readme.md"
 requires-python = ">=3.10"
@@ -25,6 +25,8 @@ green-roof-scenario = "green_roof_scenario.cli:main"
 green-roof-fetch-osm = "green_roof_scenario.osm_green_roofs:main"
 green-roof-params = "green_roof_scenario.green_roof_params:main"
 green-roof-enrich-slopes = "green_roof_scenario.citygml_slopes:main"
+green-roof-prepare-comparison = "green_roof_scenario.preparation:main"
+green-roof-run-comparison = "green_roof_scenario.comparison:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
